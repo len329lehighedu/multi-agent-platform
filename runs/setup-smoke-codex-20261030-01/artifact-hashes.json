@@ -1,0 +1,73 @@
+{
+  "algorithm": "SHA-256",
+  "files": [
+    {
+      "path": "brief.md",
+      "sha256": "8541142b5c8ee4007834502679eaab3bcec9012a404673d8e758076ef0d6b2f3"
+    },
+    {
+      "path": "build-report.md",
+      "sha256": "0270a02acf925c149514a06287c59f3442e7418d5b0140c86f33f5b2d59e75c5"
+    },
+    {
+      "path": "discovery-check.json",
+      "sha256": "706033bfea73a2602cf31914fac8cbdb197c76d6654c0349db58bbdc28804ac3"
+    },
+    {
+      "path": "execution-evidence.json",
+      "sha256": "a823c6292d1a3387c8c3696c36598dfbe523b2ab6dd21aa335f0994f06f0979a"
+    },
+    {
+      "path": "fixture/projectile.py",
+      "sha256": "9ce35e42716a2e7ded0cda523f623260c285e3bce3e61c64582890eca7ba85eb"
+    },
+    {
+      "path": "handoff-01-planner-architect.md",
+      "sha256": "42da1932bdf1900d3075784b474941df90e866ef754fa68c2a2a235c58fa2470"
+    },
+    {
+      "path": "handoff-02-architect-builder.md",
+      "sha256": "ed6122eebd052261d132a300b541fa0b6082bca5a21010cbe5641a93c97b897c"
+    },
+    {
+      "path": "handoff-03-builder-qa.md",
+      "sha256": "f6b3bcbab849bef661cbb7e91869b4d0ee183955fc9a133684a542ca19a3f04b"
+    },
+    {
+      "path": "handoff-04-qa-review.md",
+      "sha256": "65dcee3c44e63b5cd9bbb1edca9a8867fb955eb7915367c2d5d7d6697c9a9ca6"
+    },
+    {
+      "path": "learning-spec.md",
+      "sha256": "c0c74bea856116b01168764a6542e49b5da033dc5e02b8406167e45f61bfccd2"
+    },
+    {
+      "path": "qa-report.md",
+      "sha256": "209893b1ae88609e12e346f56b745e822df389342632dac4ffb4f585c1808613"
+    },
+    {
+      "path": "run.json",
+      "sha256": "0ad8986faab3987f7e7c228ccf3f0a1422fe90648e0b496a3893f88e29981d98"
+    },
+    {
+      "path": "setup-checks.txt",
+      "sha256": "2fd9e1105b2d31b2ab01ff1d50e24f695b9fc7464dc2f37180ccec30b125c331"
+    },
+    {
+      "path": "summary.md",
+      "sha256": "e1cc9bcefa03f1ee6df8a5fa9f688d3008365db8e0cd2affcc7d7cc72e01152d"
+    },
+    {
+      "path": "technical-plan.md",
+      "sha256": "d5a34b2597b21e704b4917cc06b3dfe881e740f59149c62fb413504d95938d76"
+    },
+    {
+      "path": "verification/execution.log",
+      "sha256": "d2e997df755d3c3998cebcf2b792ac3e742c53d61200514ad73c513844dc68ea"
+    },
+    {
+      "path": "verification/test_projectile.py",
+      "sha256": "aa9986be43e054fc9092ac874ff011fd65e08992a46ed31315f86a82059c944d"
+    }
+  ]
+}

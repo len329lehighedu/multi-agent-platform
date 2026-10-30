@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "run_id": null,
+  "module_id": null,
+  "module_path": null,
+  "created_at": null,
+  "status": "not-started",
+  "runtime": {
+    "name": null,
+    "version": null,
+    "model": null
+  },
+  "limits": {
+    "repair_cycles": 2,
+    "resource_budget": null
+  },
+  "assumptions": [],
+  "stages": [],
+  "handoffs": [],
+  "exemplars_used": [],
+  "human_feedback": [],
+  "limitations": [],
+  "human_acceptance": "pending"
+}

@@ -1,0 +1,11 @@
+# Independent review of claim-review artifact
+
+Reviewer: actual dispatched QA agent `/root/mvp_qa`, October 30, 2026. Reviewed `evaluations/artifacts/claim-review/module.json` and `predictor.py` directly. Findings derived from their contents; no supplied expected-answer list used. This is an intentionally isolated fixture, not a defect in either shipped pilot.
+
+| Area | Status | Evidence and implication | Required correction |
+| --- | --- | --- | --- |
+| Scientific output supports governing-equation recovery | fail | Metadata promises recovery of the governing equation but declares output kind `predictions`. `predictor.py` applies a hardcoded `2*value+1`; it contains no fitting, equation extraction, learned coefficients, or symbolic/model representation returned to the learner. A formula visible in source is not evidence the method inferred it from supplied data. | Limit the claim to numerical prediction, or implement an explicit equation-recovery method with identifiable expression and scientific validation. |
+| Evaluation supports validity/generalization | fail | Only training MSE 0.001 is supplied; held-out data is null. There is no dataset, split, target definition, baseline, residual evidence or independent ground-truth recovery comparison. Training fit alone cannot establish recovery or new-data accuracy. | Provide reproducible independent/held-out evaluation matching the claimed output, including data provenance, split, reference relationship, error definition and limitations. |
+| Performance presentation supported by measurements | fail | Display says training takes 2 seconds, while timing measurements are empty and hardware null. No training routine, dataset size, software version, model/configuration, repeat count, stopping criterion, timer scope or browser-visible latency evidence supports this duration. | Remove the promise or label an estimate explicitly; benchmark the actual workload and distinguish compute from end-to-end timing. |
+
+Recommendation: reject the learner-facing claim set in its present form. These three failures are independent: fast inference cannot establish equation recovery, and a low training error cannot supply held-out evidence. The fixture label correctly prevents its interpretation as a shipped lesson; preserve that boundary in evaluation reporting.

@@ -1,0 +1,6 @@
+{
+  "command": "codex -C <platform-root> debug prompt-input",
+  "exit_code": 1,
+  "model_called": false,
+  "error_note": "Local debug command failed; automatic discovery remains unverified. Raw output not retained."
+}

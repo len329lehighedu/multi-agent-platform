@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "run_id": "setup-smoke-codex-20261030-01",
+  "module_id": "smoke-projectile-engine",
+  "module_path": "multi-agent-platform/runs/setup-smoke-codex-20261030-01/fixture",
+  "created_at": "2026-10-30T16:06:38.958735+00:00",
+  "status": "ready-for-review",
+  "runtime": {
+    "name": "codex-desktop-native-subagents",
+    "version": "local CLI reports 0.163.0-alpha.10.2; desktop host version not independently queried",
+    "model": "inherited from current session; no override"
+  },
+  "limits": {
+    "repair_cycles": 2,
+    "resource_budget": "Four small sequential stages; no training, external API setup, deployment, or package installation."
+  },
+  "assumptions": [],
+  "stages": [
+    {
+      "role": "stem-learning-planner",
+      "native_agent": "/root/smoke_planner",
+      "mode": "explicit canonical role/skill file assignment",
+      "status": "returned",
+      "artifact": "learning-spec.md",
+      "skill_evidence": "explicit reads reported; tool activity in subagent session; no automatic preload claim"
+    },
+    {
+      "role": "stem-architect",
+      "native_agent": "/root/smoke_architect",
+      "mode": "explicit canonical role/skill file assignment",
+      "status": "returned",
+      "artifact": "technical-plan.md",
+      "skill_evidence": "explicit file reads reported; no automatic preload claim"
+    },
+    {
+      "role": "stem-builder",
+      "native_agent": "/root/smoke_builder",
+      "mode": "explicit canonical role/skill file assignment",
+      "status": "returned",
+      "artifacts": [
+        "fixture/projectile.py",
+        "build-report.md"
+      ],
+      "skill_evidence": "explicit file reads reported in build-report.md; no automatic preload claim"
+    },
+    {
+      "role": "stem-qa-reviewer",
+      "native_agent": "/root/smoke_qa",
+      "mode": "explicit canonical role/skill file assignment",
+      "status": "returned",
+      "artifacts": [
+        "qa-report.md",
+        "verification/test_projectile.py",
+        "verification/execution.log"
+      ],
+      "skill_evidence": "explicit file reads reported; no automatic preload claim",
+      "result": "SM-01\u201304 pass for numerical setup smoke only; 8 numerical test methods pass; no repairs required"
+    }
+  ],
+  "handoffs": [
+    "handoff-01-planner-architect.md",
+    "handoff-02-architect-builder.md",
+    "handoff-03-builder-qa.md",
+    "handoff-04-qa-review.md"
+  ],
+  "exemplars_used": [
+    {
+      "module_id": "sindy",
+      "source": "engine/check_datafile.py",
+      "adaptation": "early explanatory validation adapted to scalar inputs",
+      "sha256": "79ee0bb486c3217963785a103feea964d6385f6d25441c9e4b566a72e1ac76af"
+    }
+  ],
+  "human_feedback": [],
+  "limitations": [
+    "This session started in the parent SINDy directory. Role and skill files are supplied explicitly; this run does not prove automatic project discovery or custom-role selection.",
+    "Claude Code is unavailable and its adapter is statically checked only.",
+    "No full Flask/Bokeh pilot, browser interaction, learning effectiveness, training performance, or productivity claim was verified.",
+    "Persisted dispatch evidence is parent-authored; underlying native subagent tool activity remains in the Codex chat."
+  ],
+  "human_acceptance": "pending",
+  "completed_at": "2026-10-30T16:13:33.460250+00:00",
+  "verification": {
+    "smoke_criteria": {
+      "SM-01": "pass",
+      "SM-02": "pass",
+      "SM-03": "pass",
+      "SM-04": "pass"
+    },
+    "numerical_test_methods": 8,
+    "setup_test_methods": 5,
+    "repair_cycles_used": 0,
+    "human_acceptance": "pending"
+  }
+}

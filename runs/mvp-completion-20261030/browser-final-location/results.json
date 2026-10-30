@@ -1,0 +1,64 @@
+{
+  "base_url": "http://127.0.0.1:8090",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "Gallery",
+      "status": "pass",
+      "details": "Both pilot links rendered through Flask"
+    },
+    {
+      "name": "Projectile controls and isolation",
+      "status": "pass",
+      "details": "Visible keyboard-operated sliders drove server results; zero/horizontal/vertical cases checked; a second browser context stayed unchanged"
+    },
+    {
+      "name": "Regression controls and isolation",
+      "status": "pass",
+      "details": "Visible sliders/numeric seed/button updated all server results; pending inputs preserved prior results; zero-noise recovery and second-context isolation verified"
+    },
+    {
+      "name": "Responsive layouts and assessment",
+      "status": "pass",
+      "details": "Visible controls exercised at 390\u00d7844; desktop 1366\u00d71000 and narrow screenshots; no horizontal overflow/clipped canvases; feedback reveal works"
+    },
+    {
+      "name": "Browser errors",
+      "status": "pass",
+      "details": "No captured JavaScript page errors or primary-page console errors"
+    }
+  ],
+  "errors": [],
+  "viewports": [
+    {
+      "label": "projectile-desktop",
+      "width": 1366,
+      "height": 1000,
+      "horizontal_overflow": false,
+      "screenshot": "projectile-desktop.png"
+    },
+    {
+      "label": "regression-desktop",
+      "width": 1366,
+      "height": 1000,
+      "horizontal_overflow": false,
+      "screenshot": "regression-desktop.png"
+    },
+    {
+      "label": "projectile-mobile",
+      "width": 390,
+      "height": 844,
+      "horizontal_overflow": false,
+      "screenshot": "projectile-mobile.png"
+    },
+    {
+      "label": "regression-mobile",
+      "width": 390,
+      "height": 844,
+      "horizontal_overflow": false,
+      "screenshot": "regression-mobile.png"
+    }
+  ],
+  "browser_version": "156.0.8078.74",
+  "suite_wall_seconds": 14.807608583010733
+}

@@ -1,0 +1,86 @@
+{
+  "evidence_type": "orchestrator-recorded dispatch and input snapshot",
+  "runtime_mode": "Codex desktop native subagents with explicit role/skill file assignments",
+  "observed_dispatches": [
+    {
+      "stage": "planner",
+      "native_agent": "/root/smoke_planner",
+      "returned": true
+    },
+    {
+      "stage": "architect",
+      "native_agent": "/root/smoke_architect",
+      "returned": true
+    },
+    {
+      "stage": "builder",
+      "native_agent": "/root/smoke_builder",
+      "returned": true
+    },
+    {
+      "stage": "qa",
+      "native_agent": "/root/smoke_qa",
+      "returned": true,
+      "qa_report": "qa-report.md"
+    }
+  ],
+  "input_snapshots": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "5fa78b0faea2383d7e83b8afd7942243dc750ef81a22c87b161bd223050dc7e3"
+    },
+    {
+      "path": "agents/stem-learning-planner.md",
+      "sha256": "44abe201fee6603f417dae018e5891d9ba1776f55f536f90fdcc9152a78ea556"
+    },
+    {
+      "path": "agents/stem-architect.md",
+      "sha256": "902f43c9c25004367979e50d4b0fbd1b7c39cf3d7d0cc02585e373761e5bda18"
+    },
+    {
+      "path": "agents/stem-builder.md",
+      "sha256": "41e92fc433fe5185c11bbd10a5cf49a5b90ba0c7d378c2edecbfabcbcb64701e"
+    },
+    {
+      "path": "agents/stem-qa-reviewer.md",
+      "sha256": "3696c78eefcd391e29035d5919619d36afb6fd29991429532996097ae2a60cc1"
+    },
+    {
+      "path": ".agents/skills/stem-bokeh-interaction/SKILL.md",
+      "sha256": "f1af3b79ff6f9ebdcd3742f55cc9136ee8dcb6272d4e7d85bdddc9ef58ed2495"
+    },
+    {
+      "path": ".agents/skills/stem-build-module/SKILL.md",
+      "sha256": "0ffde97e4d650587bbc4309c139cc821af17083d50ccbe0faf91452fb4959a11"
+    },
+    {
+      "path": ".agents/skills/stem-flask-bokeh/SKILL.md",
+      "sha256": "5e32d5986c2867c68ab4818a0019a40050c9c80f53a3be265e7013b7368a700a"
+    },
+    {
+      "path": ".agents/skills/stem-learning-ui/SKILL.md",
+      "sha256": "e76390962ffc30a07055a8aa976414e3417caf0aeb59d58aba907cd478b55108"
+    },
+    {
+      "path": ".agents/skills/stem-lesson-design/SKILL.md",
+      "sha256": "17e2303c192bc6c8c21408e9de919292583a9f9f66de0810faa24c18295811cf"
+    },
+    {
+      "path": ".agents/skills/stem-module-examples/SKILL.md",
+      "sha256": "aa27c5e9e1c82ccf8475831286ea2e1fe2a9ac6f5d34f12e2bb1b8ea07b5846c"
+    },
+    {
+      "path": ".agents/skills/stem-module-verification/SKILL.md",
+      "sha256": "a94175df0103188f819fde8c201fec8cb38a6f9dce2610ab9443f36927415a7b"
+    },
+    {
+      "path": ".agents/skills/stem-scientific-python/SKILL.md",
+      "sha256": "d8cdff87574bc78aeb2543291816778b1ba090617fa5ac2a47890f35a196dd9d"
+    }
+  ],
+  "limitations": [
+    "This is a parent-authored record of actual tool dispatches, not an exported raw runtime trace.",
+    "Role and skill files were passed explicitly; automatic discovery/preloading/custom-role selection is not established.",
+    "Actual subagent activity and responses are visible in the parent Codex chat."
+  ]
+}

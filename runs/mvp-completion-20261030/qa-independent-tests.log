@@ -1,0 +1,13 @@
+test_csv_adapter_independent_roundtrip_and_validation (__main__.ScientificQA.test_csv_adapter_independent_roundtrip_and_validation) ... ok
+test_document_isolation_and_commit_callbacks (__main__.ScientificQA.test_document_isolation_and_commit_callbacks) ... ok
+test_fixed_noise_scaling_and_repaired_instruction (__main__.ScientificQA.test_fixed_noise_scaling_and_repaired_instruction) ... ok
+test_projectile_component_dynamics_grid (__main__.ScientificQA.test_projectile_component_dynamics_grid) ... ok
+test_projectile_scalings_and_validation (__main__.ScientificQA.test_projectile_scalings_and_validation) ... ok
+test_regression_custom_data_centered_sums_oracle (__main__.ScientificQA.test_regression_custom_data_centered_sums_oracle) ... ok
+test_regression_validation (__main__.ScientificQA.test_regression_validation) ... ok
+test_seeded_split_and_zero_noise_grid (__main__.ScientificQA.test_seeded_split_and_zero_noise_grid) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.729s
+
+OK

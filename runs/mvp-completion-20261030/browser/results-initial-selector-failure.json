@@ -1,0 +1,29 @@
+{
+  "base_url": "http://127.0.0.1:8088",
+  "status": "fail",
+  "checks": [
+    {
+      "name": "Gallery",
+      "status": "pass",
+      "details": "Both pilot links rendered through Flask"
+    },
+    {
+      "name": "Projectile controls and isolation",
+      "status": "pass",
+      "details": "Visible keyboard-operated sliders drove server results; zero/horizontal/vertical cases checked; a second browser context stayed unchanged"
+    }
+  ],
+  "errors": [],
+  "viewports": [
+    {
+      "label": "projectile-desktop",
+      "width": 1366,
+      "height": 1000,
+      "horizontal_overflow": false,
+      "screenshot": "projectile-desktop.png"
+    }
+  ],
+  "browser_version": "156.0.8078.74",
+  "failure": "TimeoutError('Locator.fill: Timeout 30000ms exceeded.\\nCall log:\\n  - waiting for get_by_role(\"spinbutton\")\\n')",
+  "suite_wall_seconds": 52.42111100000329
+}

@@ -1,0 +1,13 @@
+{
+  "matched_pairs": 0,
+  "measurements": {},
+  "target_reduction_percent": 30,
+  "minimum_pairs": 3,
+  "status": "insufficient-data",
+  "target_met": null,
+  "limitations": [
+    "Human effort must be measured on equivalent tasks with the same acceptance criteria.",
+    "Setup and maintenance effort must be reported separately; this CSV measures task effort.",
+    "Three pairs remain a small exploratory study, not a general productivity guarantee."
+  ]
+}

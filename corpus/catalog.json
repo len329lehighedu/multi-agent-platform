@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "modules": [
+    {
+      "id": "sindy",
+      "topic": "sparse governing equation discovery",
+      "source_root": "/Users/ngoleminh/STEM VISUALIZATION/SINDy",
+      "source_revision": "d58a9a9b315273e2675216593a1a4bb86a57ccb4",
+      "reviewed_at": "2026-10-30",
+      "review_status": "source-reviewed",
+      "review_method": "source inspection; no new browser/performance validation",
+      "license_status": "unverified; README badge is not license verification",
+      "case_study": "sindy.md",
+      "tags": [
+        "csv",
+        "time-series",
+        "training",
+        "diagnostics",
+        "history",
+        "bokeh",
+        "flask",
+        "html",
+        "session-state"
+      ],
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "0d5290b17b258062ae273384da54d044bd0a10ee9cecb4e03c9e1860bad4fbbb"
+        },
+        {
+          "path": "main.py",
+          "sha256": "a4deadff78f043416ddbfd1634fb21631132b75f46919aee9901601256e770c8"
+        },
+        {
+          "path": "flask_app.py",
+          "sha256": "75197232df61d396882b4e00e4ed0ccb7b43fc8b99a059a39f5f75917c603354"
+        },
+        {
+          "path": "run.sh",
+          "sha256": "438c1990d546983143dae498c775d9655d3582e4ef92bc4a5439476e03fde96e"
+        },
+        {
+          "path": "render.yaml",
+          "sha256": "8e62d0050fe1e5338f7e5e2a020198eadadf938e6a733db162524f06e0d53daa"
+        },
+        {
+          "path": "requirements.txt",
+          "sha256": "70a7fbf3da988f1a230bad31864037ed4d783685b7e200eec2ee91d0f36a9d8c"
+        },
+        {
+          "path": "engine/check_datafile.py",
+          "sha256": "79ee0bb486c3217963785a103feea964d6385f6d25441c9e4b566a72e1ac76af"
+        },
+        {
+          "path": "engine/sindy_model.py",
+          "sha256": "4c1b457f6626f95e07e19474b94ebcfb36f30f5c3dbe09d18b27f2d278a1a57b"
+        },
+        {
+          "path": "engine/suggester.py",
+          "sha256": "6b5f3b8d0e3473145fb09239aa34379a5057ceed1ae5982c29ecebec57eea7fd"
+        },
+        {
+          "path": "tabs/train_tab.py",
+          "sha256": "5c22e645d6fa28cb72c9232b84262c4be1e6327f48aea8a22d7ff4ecb5d31b35"
+        },
+        {
+          "path": "tabs/test_tab.py",
+          "sha256": "a8bd20c5c412222ab8c66f8ec96c9e5bc75e62bd66959dc64276ad415fb08b86"
+        },
+        {
+          "path": "tabs/predict_tab.py",
+          "sha256": "1d74400295ac44252aee4281d7a841ae22c7acfa703f6a50627b0ab5af159d80"
+        },
+        {
+          "path": "tabs/ensemble_tab.py",
+          "sha256": "856adc7554925821d4526fbd45f7691b4399930514626ce53068a0a36cc7c365"
+        },
+        {
+          "path": "templates/index.html",
+          "sha256": "48de669bc657c1e78fd6fd9795dd710322cf93bcae9cb3f0d52468724fde053f"
+        },
+        {
+          "path": "static/css/style.css",
+          "sha256": "f7927b8730df498d8778f15d2646a8230884117517b86602aa76e65034168686"
+        },
+        {
+          "path": "tests/test_app_smoke.py",
+          "sha256": "9e939536202cc1288765c274b1928b24ee556dc839e09a7a1ef53f2aaf3311db"
+        },
+        {
+          "path": "tests/test_ui_contracts.py",
+          "sha256": "06b3a8d467b11ccae5a8b986ac9268c7cc024e74747473d1fd53e74c4156dcda"
+        },
+        {
+          "path": "tests/test_engine.py",
+          "sha256": "95032c195b826b7aa9f9210d4f5bf46767ff98cf0763aaca8594dc7786a26b41"
+        },
+        {
+          "path": "tests/test_suggester.py",
+          "sha256": "22dd3cb17f651f60d249c86ecd734ed4109679d8d8378c28c0eddb657c11e059"
+        },
+        {
+          "path": "templates/fragment/about.html",
+          "sha256": "d9934a972da941d216ee7ab05a06f4819733e1f0cc8e8162888a0451b9709f68"
+        },
+        {
+          "path": "templates/fragment/predicting.html",
+          "sha256": "818695ccca003317a7e661a9fb816daa9f83da99573d164588b919e4dcd1ff11"
+        },
+        {
+          "path": "templates/fragment/questions.html",
+          "sha256": "e2eee87653a55b6fdcb8b36810ca9e8e269ef4c56ba64830f997d8a40605c190"
+        },
+        {
+          "path": "templates/fragment/storyline.html",
+          "sha256": "c5590b0139ec3d4006a59d918e647995ddf2724f3975f7401a31971b15d9d30c"
+        },
+        {
+          "path": "templates/fragment/testing.html",
+          "sha256": "ea805a66f4d7f24cc62f0b89b323312e5fe61eb0d0119b3a51ded17e84398e26"
+        },
+        {
+          "path": "templates/fragment/training.html",
+          "sha256": "5c5095441ede1594b2d01ead465c9dbdfe68e7731cca7cadf72eecb030906ed3"
+        }
+      ]
+    },
+    {
+      "id": "projectile",
+      "topic": "analytical dynamics and interactive controls",
+      "source_root": "../modules/projectile",
+      "source_revision": "generated-mvp-20261030; file hashes identify snapshot",
+      "reviewed_at": "2026-10-30",
+      "review_status": "automated-and-qa-reviewed; human-acceptance-pending",
+      "review_method": "independent numerical and browser evidence; see current run",
+      "license_status": "project-generated content; no distribution license assigned",
+      "case_study": "projectile.md",
+      "tags": [
+        "bokeh",
+        "flask",
+        "html",
+        "per-session-state",
+        "learning-content"
+      ],
+      "files": [
+        {
+          "path": "__init__.py",
+          "sha256": "7ec333b04e31e4227dadb9ecdf1e3fd06dff02cf7db3b4c428610f5fb1010f51"
+        },
+        {
+          "path": "engine.py",
+          "sha256": "eda6d909f1ce92a669a8a6bcc71ca6fd7a1e24d238b82fdd2df7a22e57a0585e"
+        },
+        {
+          "path": "ui.py",
+          "sha256": "d8337600874dd544eabb56be02fcbab67094ae94d4478d941bc522f32886fce2"
+        },
+        {
+          "path": "module.json",
+          "sha256": "31cd5c5dd8740a1b13b62479fea3bd772c6037fcdf50d7faf887f27d2f30fbb8"
+        },
+        {
+          "path": "README.md",
+          "sha256": "ff8b4efd31e8ff6862608beb9f58224c564e29699b2cf2adacfd33494dc09b45"
+        },
+        {
+          "path": "requirements.txt",
+          "sha256": "bbe88a3d1579f2ae5e69fc52deb58fceddd81b165e9bb7c9b85e5781aa680c21"
+        },
+        {
+          "path": "tests/test_projectile.py",
+          "sha256": "9f6b9e0f31bd8c44cae80aa0ca4ea2b5f7a1d3cd208973bf75353c6130c00673"
+        }
+      ]
+    },
+    {
+      "id": "linear-regression",
+      "topic": "seeded OLS, held-out evaluation and residual diagnostics",
+      "source_root": "../modules/linear-regression",
+      "source_revision": "generated-mvp-20261030; file hashes identify snapshot",
+      "reviewed_at": "2026-10-30",
+      "review_status": "automated-and-qa-reviewed; human-acceptance-pending",
+      "review_method": "independent numerical and browser evidence; see current run",
+      "license_status": "project-generated content; no distribution license assigned",
+      "case_study": "linear-regression.md",
+      "tags": [
+        "bokeh",
+        "flask",
+        "html",
+        "per-session-state",
+        "learning-content"
+      ],
+      "files": [
+        {
+          "path": "__init__.py",
+          "sha256": "278d70e88169a223541167e396da0162ea647dcd4072c722707901b1fe5bd7bb"
+        },
+        {
+          "path": "engine.py",
+          "sha256": "838d3ec82b79cbaebae412a458b71455cd2d99c63fa816cf8f1e5c1ef61e118c"
+        },
+        {
+          "path": "ui.py",
+          "sha256": "0887c4d60181b374d0c55a011cfae51f62e4f763830ddeea74958090a35ed1db"
+        },
+        {
+          "path": "module.json",
+          "sha256": "f7eb29c9ba843f482ebd9085c033cec3d8b81f005d122481d2c3c1bb946b3f73"
+        },
+        {
+          "path": "README.md",
+          "sha256": "04d407edc90235a553a505c979826a617f882af603237cdd67bccdeca6589dc1"
+        },
+        {
+          "path": "requirements.txt",
+          "sha256": "bbe88a3d1579f2ae5e69fc52deb58fceddd81b165e9bb7c9b85e5781aa680c21"
+        },
+        {
+          "path": "tests/test_regression.py",
+          "sha256": "99b6c0fe39140088155d2b9f2e9dab7585053027ca52a7718d6651a88370c294"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "run_id": "mvp-completion-20261030",
+  "started_at": "2026-10-30T16:20:36.229413+00:00",
+  "status": "ready-for-human-review",
+  "runtime": "codex-native-subagents, explicit shared role/skill assignment",
+  "staging_root": "/private/tmp/stem-platform-completion-20261030",
+  "destination_root": "/Users/ngoleminh/Documents/multi-agent-platform",
+  "stages": [
+    {
+      "role": "planner",
+      "agent": "/root/mvp_planner",
+      "status": "returned",
+      "artifact": "learning-spec.md"
+    },
+    {
+      "role": "architect",
+      "agent": "/root/mvp_architect",
+      "status": "returned",
+      "artifact": "technical-plan.md"
+    },
+    {
+      "role": "builder-projectile",
+      "agent": "/root/projectile_builder",
+      "status": "returned",
+      "artifact": "projectile-build-report.md"
+    },
+    {
+      "role": "builder-regression",
+      "agent": "/root/regression_builder",
+      "status": "returned",
+      "artifact": "regression-build-report.md",
+      "repair": "QA-LR-01 instructional precision fixed and rechecked"
+    },
+    {
+      "role": "qa",
+      "agent": "/root/mvp_qa",
+      "status": "returned",
+      "artifact": "qa-report.md",
+      "mandatory_criteria": "18/18 pass"
+    }
+  ],
+  "limits": {
+    "repair_cycles": 2,
+    "training": "none; bounded numerical pilots"
+  },
+  "human_acceptance": "pending",
+  "finished_at": "2026-10-30T16:38:44.259327+00:00",
+  "verification": {
+    "main_test_methods": 32,
+    "csv_adaptation_test_methods": 9,
+    "independent_qa_groups": 8,
+    "browser_checks": "pass at staging and final relocated root",
+    "fresh_environment": "pass",
+    "python": "3.14.0",
+    "human_acceptance": "pending",
+    "productivity": "insufficient-data",
+    "claude_execution": "not-run",
+    "custom_role_selection": "not-verified",
+    "codex_skill_metadata_exposure": "8/8 names plus AGENTS.md found"
+  },
+  "evidence_limit": "Agent IDs in this manifest are orchestrator records of actual native dispatches; raw subagent tool activity remains in the chat. Source/skill files were assigned explicitly."
+}

@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "sindy-local",
+      "kind": "local-module",
+      "location": "corpus/catalog.json",
+      "topic": "UI, inputs, layout, data pipeline, scientific engine and verification examples",
+      "license_status": "unverified",
+      "reviewed_at": "2026-10-30"
+    },
+    {
+      "id": "claude-subagents",
+      "url": "https://code.claude.com/docs/en/sub-agents",
+      "topic": "runtime agent configuration",
+      "license_status": "link only; copying rights not reviewed",
+      "accessed_at": "2026-10-30",
+      "version_policy": "verify against selected installed version"
+    },
+    {
+      "id": "claude-skills",
+      "url": "https://code.claude.com/docs/en/skills",
+      "topic": "runtime skill discovery",
+      "license_status": "link only; copying rights not reviewed",
+      "accessed_at": "2026-10-30",
+      "version_policy": "verify against selected installed version"
+    },
+    {
+      "id": "skill-authoring",
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices",
+      "topic": "skill structure",
+      "license_status": "link only; copying rights not reviewed",
+      "accessed_at": "2026-10-30",
+      "version_policy": "verify against selected installed version"
+    },
+    {
+      "id": "python-docs",
+      "url": "https://docs.python.org/3/",
+      "topic": "Python reference",
+      "license_status": "link only; copying rights not reviewed",
+      "accessed_at": null,
+      "version_policy": "verify against selected installed version"
+    },
+    {
+      "id": "flask-docs",
+      "url": "https://flask.palletsprojects.com/en/stable/",
+      "topic": "Flask reference",
+      "license_status": "link only; copying rights not reviewed",
+      "accessed_at": null,
+      "version_policy": "verify against selected installed version"
+    },
+    {
+      "id": "bokeh-docs",
+      "url": "https://docs.bokeh.org/en/latest/docs/user_guide/server.html",
+      "topic": "Bokeh server reference",
+      "license_status": "link only; copying rights not reviewed",
+      "accessed_at": "2026-10-30",
+      "version_policy": "verify against selected installed version"
+    },
+    {
+      "id": "codex-agents-md",
+      "url": "https://learn.chatgpt.com/docs/agent-configuration/agents-md",
+      "topic": "shared project instructions",
+      "accessed_at": "2026-10-30",
+      "license_status": "link only; copying rights not reviewed",
+      "version_policy": "verify against installed runtime"
+    },
+    {
+      "id": "codex-subagents",
+      "url": "https://learn.chatgpt.com/docs/agent-configuration/subagents",
+      "topic": "custom agent TOML and native subagent execution",
+      "accessed_at": "2026-10-30",
+      "license_status": "link only; copying rights not reviewed",
+      "version_policy": "verify against installed runtime"
+    },
+    {
+      "id": "codex-skills",
+      "url": "https://learn.chatgpt.com/docs/build-skills",
+      "topic": "local .agents/skills discovery",
+      "accessed_at": "2026-10-30",
+      "license_status": "link only; copying rights not reviewed",
+      "version_policy": "verify against installed runtime"
+    },
+    {
+      "id": "claude-cli",
+      "url": "https://code.claude.com/docs/en/cli-reference",
+      "topic": "append shared instructions without CLAUDE.md",
+      "accessed_at": "2026-10-30",
+      "license_status": "link only; copying rights not reviewed",
+      "version_policy": "verify against installed runtime"
+    }
+  ]
+}

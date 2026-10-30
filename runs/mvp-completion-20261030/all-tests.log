@@ -1,0 +1,66 @@
+$ /private/tmp/stem-platform-venv-20261030/bin/python -B scripts/test_all.py
+Testing tests
+Testing modules/linear-regression/tests
+Testing modules/projectile/tests
+All automated non-browser suites passed.
+test_invalid_and_duplicate_measurements_fail (test_productivity.ProductivityTests.test_invalid_and_duplicate_measurements_fail) ... /private/tmp/stem-platform-completion-20261030/scripts/evaluate_productivity.py:14: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2d/qqpfclbd60n55j9vp_8ms7f00000gn/T/tmpin4xplux/measurements.csv' mode='r' encoding='UTF-8'>
+  rows = list(csv.DictReader(Path(path).open(newline="")))
+/private/tmp/stem-platform-completion-20261030/scripts/evaluate_productivity.py:14: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2d/qqpfclbd60n55j9vp_8ms7f00000gn/T/tmp86yovybq/measurements.csv' mode='r' encoding='UTF-8'>
+  rows = list(csv.DictReader(Path(path).open(newline="")))
+/private/tmp/stem-platform-completion-20261030/scripts/evaluate_productivity.py:14: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2d/qqpfclbd60n55j9vp_8ms7f00000gn/T/tmp3cqa2l_z/measurements.csv' mode='r' encoding='UTF-8'>
+  rows = list(csv.DictReader(Path(path).open(newline="")))
+ok
+test_median_matched_comparison_and_unavailable_cost (test_productivity.ProductivityTests.test_median_matched_comparison_and_unavailable_cost) ... /private/tmp/stem-platform-completion-20261030/scripts/evaluate_productivity.py:14: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2d/qqpfclbd60n55j9vp_8ms7f00000gn/T/tmpwg3u21oc/measurements.csv' mode='r' encoding='UTF-8'>
+  rows = list(csv.DictReader(Path(path).open(newline="")))
+ok
+test_no_data_is_not_a_success (test_productivity.ProductivityTests.test_no_data_is_not_a_success) ... /private/tmp/stem-platform-completion-20261030/scripts/evaluate_productivity.py:14: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2d/qqpfclbd60n55j9vp_8ms7f00000gn/T/tmplq7epcnw/measurements.csv' mode='r' encoding='UTF-8'>
+  rows = list(csv.DictReader(Path(path).open(newline="")))
+ok
+test_quality_failure_is_not_excluded_from_comparison (test_productivity.ProductivityTests.test_quality_failure_is_not_excluded_from_comparison) ... /private/tmp/stem-platform-completion-20261030/scripts/evaluate_productivity.py:14: ResourceWarning: unclosed file <_io.TextIOWrapper name='/var/folders/2d/qqpfclbd60n55j9vp_8ms7f00000gn/T/tmp60j9qjc8/measurements.csv' mode='r' encoding='UTF-8'>
+  rows = list(csv.DictReader(Path(path).open(newline="")))
+ok
+test_flask_shell_health_content_and_escaping (test_runtime.RuntimeTests.test_flask_shell_health_content_and_escaping) ... ok
+test_metadata_requires_feedback_and_valid_id (test_runtime.RuntimeTests.test_metadata_requires_feedback_and_valid_id) ... ok
+test_partial_startup_failure_releases_web_port (test_runtime.RuntimeTests.test_partial_startup_failure_releases_web_port) ... ok
+test_real_startup_both_endpoints_and_shutdown (test_runtime.RuntimeTests.test_real_startup_both_endpoints_and_shutdown) ... ok
+test_scaffold_runs_and_does_not_overwrite (test_runtime.RuntimeTests.test_scaffold_runs_and_does_not_overwrite) ... ok
+test_changed_exemplar_hash_is_detected (test_setup.SetupChecks.test_changed_exemplar_hash_is_detected) ... ok
+test_current_configuration_is_consistent (test_setup.SetupChecks.test_current_configuration_is_consistent) ... ok
+test_missing_case_study_is_detected (test_setup.SetupChecks.test_missing_case_study_is_detected) ... ok
+test_shared_skill_change_requires_claude_adapter_refresh (test_setup.SetupChecks.test_shared_skill_change_requires_claude_adapter_refresh) ... ok
+test_unknown_skill_is_detected (test_setup.SetupChecks.test_unknown_skill_is_detected) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 1.865s
+
+OK
+test_fixed_realization_residuals_and_mse_scale_with_sigma (test_regression.NumericalTests.test_fixed_realization_residuals_and_mse_scale_with_sigma) ... ok
+test_held_out_responses_do_not_affect_fit (test_regression.NumericalTests.test_held_out_responses_do_not_affect_fit) ... ok
+test_independent_centered_sums_oracle (test_regression.NumericalTests.test_independent_centered_sums_oracle) ... ok
+test_invalid_controls (test_regression.NumericalTests.test_invalid_controls) ... ok
+test_invalid_dataset_shapes_values_partitions_and_rank (test_regression.NumericalTests.test_invalid_dataset_shapes_values_partitions_and_rank) ... ok
+test_reproducibility_and_noise_comparisons (test_regression.NumericalTests.test_reproducibility_and_noise_comparisons) ... ok
+test_zero_noise_recovers_true_line_at_boundaries (test_regression.NumericalTests.test_zero_noise_recovers_true_line_at_boundaries) ... ok
+test_documents_have_distinct_models_and_callback_state (test_regression.UITests.test_documents_have_distinct_models_and_callback_state) ... ok
+test_invalid_seed_retains_committed_results (test_regression.UITests.test_invalid_seed_retains_committed_results) ... ok
+test_pending_then_atomic_generate_updates_sources_metrics (test_regression.UITests.test_pending_then_atomic_generate_updates_sources_metrics) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.283s
+
+OK
+test_controls_update_arrays_and_all_summaries (test_projectile.DocumentTests.test_controls_update_arrays_and_all_summaries) ... ok
+test_lesson_contract (test_projectile.DocumentTests.test_lesson_contract) ... ok
+test_two_documents_share_no_models_or_arrays (test_projectile.DocumentTests.test_two_documents_share_no_models_or_arrays) ... ok
+test_edges_and_sample_grid (test_projectile.TrajectoryTests.test_edges_and_sample_grid) ... ok
+test_independent_thirty_degree_oracle (test_projectile.TrajectoryTests.test_independent_thirty_degree_oracle) ... ok
+test_sample_validation_and_fresh_arrays (test_projectile.TrajectoryTests.test_sample_validation_and_fresh_arrays) ... ok
+test_scalar_validation (test_projectile.TrajectoryTests.test_scalar_validation) ... ok
+test_speed_scaling_and_complementary_angles (test_projectile.TrajectoryTests.test_speed_scaling_and_complementary_angles) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.193s
+
+OK
+
+Exit: 0

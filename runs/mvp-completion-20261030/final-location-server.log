@@ -1,0 +1,24 @@
+READY http://127.0.0.1:8090/ (Bokeh 5020)
+127.0.0.1 - - [30/Oct/2026 12:37:28] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:35] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:35] "GET /static/lesson.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:36] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+127.0.0.1 - - [30/Oct/2026 12:37:36] "GET /modules/projectile/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:36] "[36mGET /static/lesson.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [30/Oct/2026 12:37:36] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+127.0.0.1 - - [30/Oct/2026 12:37:37] "GET /modules/projectile/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:37] "GET /static/lesson.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:37] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+127.0.0.1 - - [30/Oct/2026 12:37:39] "GET /modules/linear-regression/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:39] "[36mGET /static/lesson.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [30/Oct/2026 12:37:39] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+127.0.0.1 - - [30/Oct/2026 12:37:40] "GET /modules/linear-regression/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:40] "GET /static/lesson.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:40] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+127.0.0.1 - - [30/Oct/2026 12:37:41] "GET /modules/projectile/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:41] "GET /static/lesson.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:41] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+127.0.0.1 - - [30/Oct/2026 12:37:42] "GET /modules/linear-regression/ HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 12:37:42] "[36mGET /static/lesson.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [30/Oct/2026 12:37:42] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 204 -
+STOPPED: web and Bokeh endpoints closed

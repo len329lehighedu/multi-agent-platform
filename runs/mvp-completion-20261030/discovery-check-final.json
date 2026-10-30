@@ -1,0 +1,18 @@
+{
+  "command": "codex -C <relocated-root> debug prompt-input",
+  "exit_code": 0,
+  "model_called": false,
+  "agents_md_marker_found": true,
+  "skill_names_present": [
+    "stem-build-module",
+    "stem-module-examples",
+    "stem-lesson-design",
+    "stem-scientific-python",
+    "stem-bokeh-interaction",
+    "stem-flask-bokeh",
+    "stem-learning-ui",
+    "stem-module-verification"
+  ],
+  "custom_role_names_present": [],
+  "limit": "Prompt exposure of a role/skill name is not invocation or runtime preload evidence."
+}

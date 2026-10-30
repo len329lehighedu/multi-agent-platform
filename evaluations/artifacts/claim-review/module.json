@@ -1,0 +1,9 @@
+{
+  "title": "Neural equation discovery review fixture",
+  "description": "A learner uploads data and receives predictions from a stored neural predictor.",
+  "scientific_claim": "The module recovers the governing equation from the supplied data.",
+  "output": {"kind": "predictions", "values": [1.0, 2.0, 3.0]},
+  "training": {"display_text": "Training takes 2 seconds", "timing_measurements": [], "hardware": null},
+  "evaluation": {"training_mse": 0.001, "held_out_data": null},
+  "review_status": "controlled evaluation fixture; not a shipped learning module"
+}

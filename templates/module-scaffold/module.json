@@ -1,0 +1,11 @@
+{
+  "title": "Parameter exploration",
+  "subtitle": "Predict, change a coefficient, and explain the graph.",
+  "objectives": ["Explain how the coefficient changes a straight line's slope."],
+  "assumptions": ["This starter uses y = a × x with dimensionless variables and no intercept."],
+  "questions": [
+    {"question": "What changes when the coefficient doubles?", "answer": "For each fixed x, y doubles; the slope doubles."},
+    {"question": "What does a negative coefficient do?", "answer": "The line slopes downward: increasing positive x makes y more negative."},
+    {"question": "Where do all these lines intersect?", "answer": "At the origin, because this model has no intercept."}
+  ]
+}

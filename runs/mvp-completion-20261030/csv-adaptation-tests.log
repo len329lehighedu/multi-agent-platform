@@ -1,0 +1,17 @@
+$ /private/tmp/stem-platform-venv-20261030/bin/python -B -m unittest discover -s evaluations/artifacts/csv-adaptation/tests -v
+test_boundary_sizes_and_known_line (test_csv_adapter.CSVAdaptationTests.test_boundary_sizes_and_known_line) ... ok
+test_generated_data_round_trip_and_shipped_scientific_pipeline (test_csv_adapter.CSVAdaptationTests.test_generated_data_round_trip_and_shipped_scientific_pipeline) ... ok
+test_held_out_response_changes_preserve_fit (test_csv_adapter.CSVAdaptationTests.test_held_out_response_changes_preserve_fit) ... ok
+test_reject_headers_and_malformed_columns_quotes (test_csv_adapter.CSVAdaptationTests.test_reject_headers_and_malformed_columns_quotes) ... ok
+test_reject_invalid_seed_and_nontext (test_csv_adapter.CSVAdaptationTests.test_reject_invalid_seed_and_nontext) ... ok
+test_reject_nonnumeric_nonfinite_empty_cells (test_csv_adapter.CSVAdaptationTests.test_reject_nonnumeric_nonfinite_empty_cells) ... ok
+test_reject_row_count_boundaries (test_csv_adapter.CSVAdaptationTests.test_reject_row_count_boundaries) ... ok
+test_shipped_rank_validation_remains_effective (test_csv_adapter.CSVAdaptationTests.test_shipped_rank_validation_remains_effective) ... ok
+test_split_reproducible_disjoint_exhaustive (test_csv_adapter.CSVAdaptationTests.test_split_reproducible_disjoint_exhaustive) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.027s
+
+OK
+
+Exit: 0

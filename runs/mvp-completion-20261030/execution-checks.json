@@ -1,0 +1,22 @@
+[
+  {
+    "log": "all-tests.log",
+    "exit_code": 0
+  },
+  {
+    "log": "csv-adaptation-tests.log",
+    "exit_code": 0
+  },
+  {
+    "log": "qa-independent-final.log",
+    "exit_code": 0
+  },
+  {
+    "log": "pip-check.log",
+    "exit_code": 0
+  },
+  {
+    "log": "browser-command.log",
+    "exit_code": 0
+  }
+]

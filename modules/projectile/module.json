@@ -1,0 +1,29 @@
+{
+  "title": "Projectile motion",
+  "subtitle": "Predict a flight, change its launch, and explain the result.",
+  "objectives": [
+    "Explain how changing speed changes flight time, horizontal range, and maximum height.",
+    "Compare complementary launch angles and explain their equal range under the model assumptions.",
+    "Identify why air resistance or unequal launch and landing heights can change these conclusions."
+  ],
+  "assumptions": [
+    "Two-dimensional motion with constant downward gravity g = 9.81 m/s² and no air resistance.",
+    "Launch and landing are at the same height. Speed is 0–50 m/s; angle is 0–90 degrees from horizontal.",
+    "Horizontal motion has constant velocity; vertical motion has constant acceleration. Flight ends on returning to launch height.",
+    "With zero speed or a horizontal launch from ground level, the flight duration, range, and height are zero. A vertical launch has zero range."
+  ],
+  "questions": [
+    {
+      "question": "At a fixed angle of 30°, what happens to flight time, range, and maximum height if speed doubles? Predict, then compare 20 and 40 m/s.",
+      "answer": "Flight time doubles, while range and maximum height each quadruple. Time is proportional to speed; range and height are proportional to speed squared when the angle and gravity stay fixed."
+    },
+    {
+      "question": "At the same nonzero speed, do 30° and 60° give the same range? Which flight lasts longer and reaches higher?",
+      "answer": "They have equal range because sin(2 × 30°) = sin(2 × 60°). The 60° launch has more initial upward velocity, so it lasts longer and reaches higher. Complementary angles sum to 90°."
+    },
+    {
+      "question": "Must complementary angles still have equal range with air resistance or different launch and landing heights?",
+      "answer": "No. The equal-range relationship depends on this model's no-drag and equal-height assumptions. Drag changes the velocities during flight; unequal heights change the landing time. These situations require a different model."
+    }
+  ]
+}

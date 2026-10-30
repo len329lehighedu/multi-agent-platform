@@ -1,0 +1,62 @@
+{
+  "environment": {
+    "python": "3.14.0",
+    "platform": "macOS-26.1-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "packages": {
+      "numpy": "2.4.1",
+      "bokeh": "3.8.2",
+      "flask": "3.1.2"
+    }
+  },
+  "noise_scaling": {
+    "n": 100,
+    "seed": 42,
+    "sigma_pair": [
+      1,
+      2
+    ],
+    "train_mse_ratio": 4.000000000000002,
+    "test_mse_ratio": 3.999999999999996
+  },
+  "http_test_client_routes": {
+    "/": {
+      "status": 200,
+      "feedback_count": 0
+    },
+    "/health": {
+      "status": 200,
+      "feedback_count": 0
+    },
+    "/modules/projectile/": {
+      "status": 200,
+      "feedback_count": 3
+    },
+    "/modules/linear-regression/": {
+      "status": 200,
+      "feedback_count": 3
+    },
+    "/modules/no-such-module/": {
+      "status": 404,
+      "feedback_count": 0
+    }
+  },
+  "explicitly_inspected_source_hashes": {
+    "main.py": {
+      "actual": "a4deadff78f043416ddbfd1634fb21631132b75f46919aee9901601256e770c8",
+      "matches_catalog": true
+    },
+    "tabs/test_tab.py": {
+      "actual": "a8bd20c5c412222ab8c66f8ec96c9e5bc75e62bd66959dc64276ad415fb08b86",
+      "matches_catalog": true
+    },
+    "flask_app.py": {
+      "actual": "75197232df61d396882b4e00e4ed0ccb7b43fc8b99a059a39f5f75917c603354",
+      "matches_catalog": true
+    },
+    "templates/index.html": {
+      "actual": "48de669bc657c1e78fd6fd9795dd710322cf93bcae9cb3f0d52468724fde053f",
+      "matches_catalog": true
+    }
+  }
+}

@@ -1,0 +1,231 @@
+$ /Library/Frameworks/Python.framework/Versions/3.14/bin/python3 -m venv /Users/ngoleminh/Documents/multi-agent-platform/.venv
+$ /Users/ngoleminh/Documents/multi-agent-platform/.venv/bin/python -m pip install --disable-pip-version-check -r requirements-browser.lock.txt
+Collecting blinker==1.9.0 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 2))
+  Using cached blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting bokeh==3.8.2 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 3))
+  Using cached bokeh-3.8.2-py3-none-any.whl.metadata (10 kB)
+Collecting click==8.5.0 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 4))
+  Using cached click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting contourpy==1.4.0 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 5))
+  Using cached contourpy-1.4.0-cp314-cp314-macosx_11_0_arm64.whl.metadata (3.8 kB)
+Collecting Flask==3.1.2 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 6))
+  Using cached flask-3.1.2-py3-none-any.whl.metadata (3.2 kB)
+Collecting itsdangerous==2.2.0 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 7))
+  Using cached itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting Jinja2==3.1.6 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 8))
+  Using cached jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting MarkupSafe==3.0.4 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 9))
+  Using cached markupsafe-3.0.4-cp314-cp314-macosx_11_0_arm64.whl.metadata (2.7 kB)
+Collecting narwhals==2.28.0 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 10))
+  Using cached narwhals-2.28.0-py3-none-any.whl.metadata (15 kB)
+Collecting numpy==2.4.1 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 11))
+  Using cached numpy-2.4.1-cp314-cp314-macosx_14_0_arm64.whl.metadata (6.6 kB)
+Collecting packaging==26.3 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 12))
+  Using cached packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting pandas==3.1.0 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 13))
+  Using cached pandas-3.1.0-cp314-cp314-macosx_11_0_arm64.whl.metadata (18 kB)
+Collecting pillow==13.0.0 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 14))
+  Using cached pillow-13.0.0-cp314-cp314-macosx_11_0_arm64.whl.metadata (9.1 kB)
+Collecting python-dateutil==3.0.0 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 15))
+  Using cached python_dateutil-3.0.0-py2.py3-none-any.whl.metadata (8.2 kB)
+Collecting PyYAML==6.0.3 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 16))
+  Using cached pyyaml-6.0.3-cp314-cp314-macosx_11_0_arm64.whl.metadata (2.4 kB)
+Collecting six==1.17.0 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 17))
+  Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting tornado==6.6 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 18))
+  Using cached tornado-6.6-cp311-abi3-macosx_10_9_universal2.whl.metadata (2.6 kB)
+Collecting tzdata==2026.6 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 19))
+  Using cached tzdata-2026.6-py2.py3-none-any.whl.metadata (1.4 kB)
+Collecting Werkzeug==3.1.9 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 20))
+  Using cached werkzeug-3.1.9-py3-none-any.whl.metadata (4.1 kB)
+Collecting xyzservices==2026.9.1 (from -r /Users/ngoleminh/Documents/multi-agent-platform/requirements.lock.txt (line 21))
+  Using cached xyzservices-2026.9.1-py3-none-any.whl.metadata (4.1 kB)
+Collecting greenlet==3.5.6 (from -r requirements-browser.lock.txt (line 2))
+  Using cached greenlet-3.5.6-cp314-cp314-macosx_11_0_universal2.whl.metadata (3.8 kB)
+Collecting playwright==1.55.0 (from -r requirements-browser.lock.txt (line 3))
+  Using cached playwright-1.55.0-py3-none-macosx_11_0_arm64.whl.metadata (3.5 kB)
+Collecting pyee==13.0.1 (from -r requirements-browser.lock.txt (line 4))
+  Using cached pyee-13.0.1-py3-none-any.whl.metadata (3.0 kB)
+Collecting typing_extensions==4.16.0 (from -r requirements-browser.lock.txt (line 5))
+  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Using cached blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Using cached bokeh-3.8.2-py3-none-any.whl (7.2 MB)
+Using cached click-8.5.0-py3-none-any.whl (125 kB)
+Using cached contourpy-1.4.0-cp314-cp314-macosx_11_0_arm64.whl (283 kB)
+Using cached flask-3.1.2-py3-none-any.whl (103 kB)
+Using cached itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Using cached jinja2-3.1.6-py3-none-any.whl (134 kB)
+Using cached markupsafe-3.0.4-cp314-cp314-macosx_11_0_arm64.whl (12 kB)
+Using cached narwhals-2.28.0-py3-none-any.whl (490 kB)
+Using cached numpy-2.4.1-cp314-cp314-macosx_14_0_arm64.whl (5.2 MB)
+Using cached packaging-26.3-py3-none-any.whl (129 kB)
+Using cached pandas-3.1.0-cp314-cp314-macosx_11_0_arm64.whl (11.3 MB)
+Using cached pillow-13.0.0-cp314-cp314-macosx_11_0_arm64.whl (4.9 MB)
+Using cached python_dateutil-3.0.0-py2.py3-none-any.whl (94 kB)
+Using cached pyyaml-6.0.3-cp314-cp314-macosx_11_0_arm64.whl (173 kB)
+Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Using cached tornado-6.6-cp311-abi3-macosx_10_9_universal2.whl (528 kB)
+Using cached tzdata-2026.6-py2.py3-none-any.whl (348 kB)
+Using cached werkzeug-3.1.9-py3-none-any.whl (228 kB)
+Using cached xyzservices-2026.9.1-py3-none-any.whl (98 kB)
+Using cached greenlet-3.5.6-cp314-cp314-macosx_11_0_universal2.whl (295 kB)
+Using cached playwright-1.55.0-py3-none-macosx_11_0_arm64.whl (38.7 MB)
+Using cached pyee-13.0.1-py3-none-any.whl (15 kB)
+Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Installing collected packages: xyzservices, tzdata, typing_extensions, tornado, six, PyYAML, pillow, packaging, numpy, narwhals, MarkupSafe, itsdangerous, greenlet, click, blinker, Werkzeug, python-dateutil, pyee, Jinja2, contourpy, playwright, pandas, Flask, bokeh
+
+Successfully installed Flask-3.1.2 Jinja2-3.1.6 MarkupSafe-3.0.4 PyYAML-6.0.3 Werkzeug-3.1.9 blinker-1.9.0 bokeh-3.8.2 click-8.5.0 contourpy-1.4.0 greenlet-3.5.6 itsdangerous-2.2.0 narwhals-2.28.0 numpy-2.4.1 packaging-26.3 pandas-3.1.0 pillow-13.0.0 playwright-1.55.0 pyee-13.0.1 python-dateutil-3.0.0 six-1.17.0 tornado-6.6 typing_extensions-4.16.0 tzdata-2026.6 xyzservices-2026.9.1
+$ /Users/ngoleminh/Documents/multi-agent-platform/.venv/bin/python -m pip check
+No broken requirements found.
+$ /Users/ngoleminh/Documents/multi-agent-platform/.venv/bin/python -B scripts/test_all.py
+Testing tests
+test_invalid_and_duplicate_measurements_fail (test_productivity.ProductivityTests.test_invalid_and_duplicate_measurements_fail) ... ok
+test_median_matched_comparison_and_unavailable_cost (test_productivity.ProductivityTests.test_median_matched_comparison_and_unavailable_cost) ... ok
+test_no_data_is_not_a_success (test_productivity.ProductivityTests.test_no_data_is_not_a_success) ... ok
+test_quality_failure_is_not_excluded_from_comparison (test_productivity.ProductivityTests.test_quality_failure_is_not_excluded_from_comparison) ... ok
+test_flask_shell_health_content_and_escaping (test_runtime.RuntimeTests.test_flask_shell_health_content_and_escaping) ... ok
+test_metadata_requires_feedback_and_valid_id (test_runtime.RuntimeTests.test_metadata_requires_feedback_and_valid_id) ... ok
+test_partial_startup_failure_releases_web_port (test_runtime.RuntimeTests.test_partial_startup_failure_releases_web_port) ... ok
+test_real_startup_both_endpoints_and_shutdown (test_runtime.RuntimeTests.test_real_startup_both_endpoints_and_shutdown) ... ok
+test_scaffold_runs_and_does_not_overwrite (test_runtime.RuntimeTests.test_scaffold_runs_and_does_not_overwrite) ... ok
+test_changed_exemplar_hash_is_detected (test_setup.SetupChecks.test_changed_exemplar_hash_is_detected) ... ok
+test_current_configuration_is_consistent (test_setup.SetupChecks.test_current_configuration_is_consistent) ... ok
+test_missing_case_study_is_detected (test_setup.SetupChecks.test_missing_case_study_is_detected) ... ok
+test_shared_skill_change_requires_claude_adapter_refresh (test_setup.SetupChecks.test_shared_skill_change_requires_claude_adapter_refresh) ... ok
+test_unknown_skill_is_detected (test_setup.SetupChecks.test_unknown_skill_is_detected) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 10.299s
+
+OK
+Testing modules/linear-regression/tests
+test_fixed_realization_residuals_and_mse_scale_with_sigma (test_regression.NumericalTests.test_fixed_realization_residuals_and_mse_scale_with_sigma) ... ok
+test_held_out_responses_do_not_affect_fit (test_regression.NumericalTests.test_held_out_responses_do_not_affect_fit) ... ok
+test_independent_centered_sums_oracle (test_regression.NumericalTests.test_independent_centered_sums_oracle) ... ok
+test_invalid_controls (test_regression.NumericalTests.test_invalid_controls) ... ok
+test_invalid_dataset_shapes_values_partitions_and_rank (test_regression.NumericalTests.test_invalid_dataset_shapes_values_partitions_and_rank) ... ok
+test_reproducibility_and_noise_comparisons (test_regression.NumericalTests.test_reproducibility_and_noise_comparisons) ... ok
+test_zero_noise_recovers_true_line_at_boundaries (test_regression.NumericalTests.test_zero_noise_recovers_true_line_at_boundaries) ... ok
+test_documents_have_distinct_models_and_callback_state (test_regression.UITests.test_documents_have_distinct_models_and_callback_state) ... ok
+test_invalid_seed_retains_committed_results (test_regression.UITests.test_invalid_seed_retains_committed_results) ... ok
+test_pending_then_atomic_generate_updates_sources_metrics (test_regression.UITests.test_pending_then_atomic_generate_updates_sources_metrics) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.469s
+
+OK
+Testing modules/projectile/tests
+test_controls_update_arrays_and_all_summaries (test_projectile.DocumentTests.test_controls_update_arrays_and_all_summaries) ... ok
+test_lesson_contract (test_projectile.DocumentTests.test_lesson_contract) ... ok
+test_two_documents_share_no_models_or_arrays (test_projectile.DocumentTests.test_two_documents_share_no_models_or_arrays) ... ok
+test_edges_and_sample_grid (test_projectile.TrajectoryTests.test_edges_and_sample_grid) ... ok
+test_independent_thirty_degree_oracle (test_projectile.TrajectoryTests.test_independent_thirty_degree_oracle) ... ok
+test_sample_validation_and_fresh_arrays (test_projectile.TrajectoryTests.test_sample_validation_and_fresh_arrays) ... ok
+test_scalar_validation (test_projectile.TrajectoryTests.test_scalar_validation) ... ok
+test_speed_scaling_and_complementary_angles (test_projectile.TrajectoryTests.test_speed_scaling_and_complementary_angles) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.214s
+
+OK
+All automated non-browser suites passed.
+$ /Users/ngoleminh/Documents/multi-agent-platform/.venv/bin/python -B runs/mvp-completion-20261030/independent-science-tests.py
+test_csv_adapter_independent_roundtrip_and_validation (__main__.ScientificQA.test_csv_adapter_independent_roundtrip_and_validation) ... ok
+test_document_isolation_and_commit_callbacks (__main__.ScientificQA.test_document_isolation_and_commit_callbacks) ... ok
+test_fixed_noise_scaling_and_repaired_instruction (__main__.ScientificQA.test_fixed_noise_scaling_and_repaired_instruction) ... ok
+test_projectile_component_dynamics_grid (__main__.ScientificQA.test_projectile_component_dynamics_grid) ... ok
+test_projectile_scalings_and_validation (__main__.ScientificQA.test_projectile_scalings_and_validation) ... ok
+test_regression_custom_data_centered_sums_oracle (__main__.ScientificQA.test_regression_custom_data_centered_sums_oracle) ... ok
+test_regression_validation (__main__.ScientificQA.test_regression_validation) ... ok
+test_seeded_split_and_zero_noise_grid (__main__.ScientificQA.test_seeded_split_and_zero_noise_grid) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.547s
+
+OK
+$ /Users/ngoleminh/Documents/multi-agent-platform/.venv/bin/python -B -m unittest discover -s evaluations/artifacts/csv-adaptation/tests -v
+test_boundary_sizes_and_known_line (test_csv_adapter.CSVAdaptationTests.test_boundary_sizes_and_known_line) ... ok
+test_generated_data_round_trip_and_shipped_scientific_pipeline (test_csv_adapter.CSVAdaptationTests.test_generated_data_round_trip_and_shipped_scientific_pipeline) ... ok
+test_held_out_response_changes_preserve_fit (test_csv_adapter.CSVAdaptationTests.test_held_out_response_changes_preserve_fit) ... ok
+test_reject_headers_and_malformed_columns_quotes (test_csv_adapter.CSVAdaptationTests.test_reject_headers_and_malformed_columns_quotes) ... ok
+test_reject_invalid_seed_and_nontext (test_csv_adapter.CSVAdaptationTests.test_reject_invalid_seed_and_nontext) ... ok
+test_reject_nonnumeric_nonfinite_empty_cells (test_csv_adapter.CSVAdaptationTests.test_reject_nonnumeric_nonfinite_empty_cells) ... ok
+test_reject_row_count_boundaries (test_csv_adapter.CSVAdaptationTests.test_reject_row_count_boundaries) ... ok
+test_shipped_rank_validation_remains_effective (test_csv_adapter.CSVAdaptationTests.test_shipped_rank_validation_remains_effective) ... ok
+test_split_reproducible_disjoint_exhaustive (test_csv_adapter.CSVAdaptationTests.test_split_reproducible_disjoint_exhaustive) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.034s
+
+OK
+$ /Users/ngoleminh/Documents/multi-agent-platform/.venv/bin/python scripts/check_setup.py --runtime codex
+Configuration: 4 roles, 8 skills; 0 error(s)
+Selected CLI (codex): /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex
+Codex CLI: available
+Claude Code: not found on PATH (optional)
+Scope: static local checks only; no model calls or browser verification
+$ /Users/ngoleminh/Documents/multi-agent-platform/.venv/bin/python scripts/test_browser.py --base-url http://127.0.0.1:8090 --output runs/mvp-completion-20261030/browser-final-location --browser-executable /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+{
+  "base_url": "http://127.0.0.1:8090",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "Gallery",
+      "status": "pass",
+      "details": "Both pilot links rendered through Flask"
+    },
+    {
+      "name": "Projectile controls and isolation",
+      "status": "pass",
+      "details": "Visible keyboard-operated sliders drove server results; zero/horizontal/vertical cases checked; a second browser context stayed unchanged"
+    },
+    {
+      "name": "Regression controls and isolation",
+      "status": "pass",
+      "details": "Visible sliders/numeric seed/button updated all server results; pending inputs preserved prior results; zero-noise recovery and second-context isolation verified"
+    },
+    {
+      "name": "Responsive layouts and assessment",
+      "status": "pass",
+      "details": "Visible controls exercised at 390\u00d7844; desktop 1366\u00d71000 and narrow screenshots; no horizontal overflow/clipped canvases; feedback reveal works"
+    },
+    {
+      "name": "Browser errors",
+      "status": "pass",
+      "details": "No captured JavaScript page errors or primary-page console errors"
+    }
+  ],
+  "errors": [],
+  "viewports": [
+    {
+      "label": "projectile-desktop",
+      "width": 1366,
+      "height": 1000,
+      "horizontal_overflow": false,
+      "screenshot": "projectile-desktop.png"
+    },
+    {
+      "label": "regression-desktop",
+      "width": 1366,
+      "height": 1000,
+      "horizontal_overflow": false,
+      "screenshot": "regression-desktop.png"
+    },
+    {
+      "label": "projectile-mobile",
+      "width": 390,
+      "height": 844,
+      "horizontal_overflow": false,
+      "screenshot": "projectile-mobile.png"
+    },
+    {
+      "label": "regression-mobile",
+      "width": 390,
+      "height": 844,
+      "horizontal_overflow": false,
+      "screenshot": "regression-mobile.png"
+    }
+  ],
+  "browser_version": "156.0.8078.74",
+  "suite_wall_seconds": 14.807608583010733
+}

@@ -1,0 +1,71 @@
+cwd: /Users/ngoleminh/STEM VISUALIZATION/SINDy/multi-agent-platform
+Python: 3.14.0 (v3.14.0:ebf955df7a8, Oct  7 2025, 08:20:14) [Clang 16.0.0 (clang-1600.0.26.6)]
+platform: macOS-26.1-arm64-arm-64bit-Mach-O
+machine: arm64
+
+COMMAND: ['python3', '-B', '-m', 'unittest', 'discover', '-s', 'runs/setup-smoke-codex-20261030-01/verification', '-p', 'test_*.py', '-v']
+STDOUT:
+
+STDERR:
+test_closed_forms (test_projectile.ProjectileQA.test_closed_forms) ... ok
+test_exact_endpoints_and_positive_zero (test_projectile.ProjectileQA.test_exact_endpoints_and_positive_zero) ... ok
+test_fresh_dictionary (test_projectile.ProjectileQA.test_fresh_dictionary) ... ok
+test_grid_api_and_physical_invariants (test_projectile.ProjectileQA.test_grid_api_and_physical_invariants) ... ok
+test_invalid_numbers_including_huge_ints (test_projectile.ProjectileQA.test_invalid_numbers_including_huge_ints) ... ok
+test_invalid_types_and_explanatory_errors (test_projectile.ProjectileQA.test_invalid_types_and_explanatory_errors) ... ok
+test_near_endpoints_are_not_snapped (test_projectile.ProjectileQA.test_near_endpoints_are_not_snapped) ... ok
+test_speed_scaling (test_projectile.ProjectileQA.test_speed_scaling) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.001s
+
+OK
+
+EXIT: 0
+
+COMMAND: ['python3', '-B', 'scripts/check_setup.py']
+STDOUT:
+Configuration: 4 roles, 8 skills; 0 error(s)
+Selected CLI (codex): /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex
+Codex CLI: available
+Claude Code: not found on PATH (optional)
+Scope: static local checks only; no model calls or browser verification
+
+STDERR:
+
+EXIT: 0
+
+COMMAND: ['python3', '-B', 'scripts/sync_runtime.py', '--check']
+STDOUT:
+Runtime adapter check: 0 error(s)
+
+STDERR:
+
+EXIT: 0
+
+COMMAND: ['python3', '-B', 'scripts/check_setup.py', '--require-runtime', '--runtime', 'codex']
+STDOUT:
+Configuration: 4 roles, 8 skills; 0 error(s)
+Selected CLI (codex): /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex
+Codex CLI: available
+Claude Code: not found on PATH (optional)
+Scope: static local checks only; no model calls or browser verification
+
+STDERR:
+
+EXIT: 0
+
+COMMAND: ['python3', '-B', 'scripts/check_setup.py', '--require-runtime', '--runtime', 'claude']
+STDOUT:
+FAIL: claude is not on PATH; CLI runtime checks are unavailable
+Configuration: 4 roles, 8 skills; 1 error(s)
+Selected CLI (claude): not found on PATH
+Codex CLI: available
+Claude Code: not found on PATH (optional)
+Scope: static local checks only; no model calls or browser verification
+
+STDERR:
+
+EXIT: 1
+SHA256 /Users/ngoleminh/STEM VISUALIZATION/SINDy/multi-agent-platform/../engine/check_datafile.py: 79ee0bb486c3217963785a103feea964d6385f6d25441c9e4b566a72e1ac76af
+SHA256 /Users/ngoleminh/STEM VISUALIZATION/SINDy/multi-agent-platform/runs/setup-smoke-codex-20261030-01/fixture/projectile.py: 9ce35e42716a2e7ded0cda523f623260c285e3bce3e61c64582890eca7ba85eb

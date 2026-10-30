@@ -1,0 +1,24 @@
+$ python3 scripts/sync_runtime.py --check
+Runtime adapter check: 0 error(s)
+Exit code: 0
+
+$ python3 scripts/check_setup.py --runtime codex --require-runtime
+Configuration: 4 roles, 8 skills; 0 error(s)
+Selected CLI (codex): /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex
+Codex CLI: available
+Claude Code: not found on PATH (optional)
+Scope: static local checks only; no model calls or browser verification
+Exit code: 0
+
+$ python3 -m unittest discover -s tests -v
+test_changed_exemplar_hash_is_detected (test_setup.SetupChecks.test_changed_exemplar_hash_is_detected) ... ok
+test_current_configuration_is_consistent (test_setup.SetupChecks.test_current_configuration_is_consistent) ... ok
+test_missing_case_study_is_detected (test_setup.SetupChecks.test_missing_case_study_is_detected) ... ok
+test_shared_skill_change_requires_claude_adapter_refresh (test_setup.SetupChecks.test_shared_skill_change_requires_claude_adapter_refresh) ... ok
+test_unknown_skill_is_detected (test_setup.SetupChecks.test_unknown_skill_is_detected) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.116s
+
+OK
+Exit code: 0
