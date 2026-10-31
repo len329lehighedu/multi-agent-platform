@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "run_id": "neural-equation-20261030-01",
+  "module_id": "neural-equation-finder",
+  "module_path": "modules/neural-equation-finder",
+  "created_at": "2026-10-30T15:00:00-04:00",
+  "status": "ready-for-review",
+  "runtime": {
+    "name": "Codex native subagents with explicit role and skill files",
+    "version": "0.163.0-alpha.10.2",
+    "model": "inherited from parent session"
+  },
+  "limits": {
+    "repair_cycles": 2,
+    "resource_budget": "local CPU; 5,000 rows; 4 features; 2,000 MLP iterations; 2 repair cycles"
+  },
+  "assumptions": [
+    "CSV contains a header and numeric regression columns.",
+    "An explicit polynomial surrogate is acceptable when labeled separately from the neural network.",
+    "The supplied dashboard PDF is visual guidance rather than application instructions."
+  ],
+  "stages": [
+    {
+      "role": "stem-learning-planner",
+      "status": "complete",
+      "artifact": "runs/neural-equation-20261030-01/learning-spec.md",
+      "execution": "native subagent with explicit canonical role and skill paths"
+    },
+    {
+      "role": "stem-architect",
+      "status": "complete",
+      "artifact": "runs/neural-equation-20261030-01/technical-plan.md",
+      "execution": "native subagent with explicit canonical role and skill paths"
+    },
+    {
+      "role": "stem-builder",
+      "status": "complete",
+      "artifact": "runs/neural-equation-20261030-01/build-report.md",
+      "execution": "native subagent with explicit canonical role and skill paths"
+    },
+    {
+      "role": "stem-qa-reviewer",
+      "status": "complete",
+      "artifact": "runs/neural-equation-20261030-01/qa-report.md",
+      "execution": "native subagent with explicit canonical role and skill paths; 12 mandatory criteria passed"
+    }
+  ],
+  "handoffs": [
+    "runs/neural-equation-20261030-01/handoff-01-planner-architect.md",
+    "runs/neural-equation-20261030-01/handoff-02-architect-builder.md"
+  ],
+  "exemplars_used": [
+    "corpus/sindy.md",
+    "Data Science Platform - Dashboard Layouts.pdf (visual reference supplied by user)"
+  ],
+  "human_feedback": [
+    "Current UI is too text-heavy and visually busy.",
+    "Remove the projectile and linear-regression modules.",
+    "Build a deeper CSV-to-neural-equation module with a simple dashboard presentation."
+  ],
+  "limitations": [
+    "User data was not attached; built-in and generated fixtures will be used.",
+    "The neural network is a numerical predictor; the displayed equation is a measured polynomial surrogate."
+  ],
+  "human_acceptance": "pending"
+}

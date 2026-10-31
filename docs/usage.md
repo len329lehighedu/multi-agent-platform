@@ -1,6 +1,8 @@
-# Current MVP usage
+# Current platform usage
 
-For running both pilots, automated/browser tests, and the advisor demo, start with [the complete walkthrough](testing-guide.vi.md). Shared hosting is now implemented in `stem_platform/runtime.py`; `scripts/create_module.py` creates a runnable starter. The earlier setup-smoke instructions below remain useful for understanding explicit runtime mode.
+The active application is now the single `neural-equation-finder` dashboard. The projectile and linear-regression source modules were removed on October 30, 2026; references below to the original pilots describe historical setup-smoke context. For current run, CSV, browser, and interpretation steps use [the Vietnamese testing guide](testing-guide.vi.md) and `runs/neural-equation-20261030-01/`.
+
+For running the dashboard, automated/browser tests, and the advisor demo, start with [the complete walkthrough](testing-guide.vi.md). Shared hosting is implemented in `stem_platform/runtime.py`; `scripts/create_module.py` still creates a runnable lesson-style starter.
 
 # Using the platform with Codex or Claude Code
 

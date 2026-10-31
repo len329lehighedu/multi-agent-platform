@@ -2,10 +2,12 @@
 blinker==1.9.0
 bokeh==3.8.2
 click==8.5.0
+cloudpickle==3.1.2
 contourpy==1.4.0
 Flask==3.1.2
 itsdangerous==2.2.0
 Jinja2==3.1.6
+joblib==1.6.0
 MarkupSafe==3.0.4
 narwhals==2.28.0
 numpy==2.4.1
@@ -14,7 +16,10 @@ pandas==3.1.0
 pillow==13.0.0
 python-dateutil==3.0.0
 PyYAML==6.0.3
+scikit-learn==1.9.1
+scipy==1.18.1
 six==1.17.0
+threadpoolctl==3.7.0
 tornado==6.6
 tzdata==2026.6
 Werkzeug==3.1.9

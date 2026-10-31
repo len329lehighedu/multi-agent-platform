@@ -1,0 +1,15 @@
+$ /private/tmp/neural-equation-venv-20261030/bin/python runs/neural-equation-20261030-01/verification/focused_browser.py
+{
+  "status": "pass",
+  "checks": [
+    "Malformed duplicate-header upload rejected without replacing existing selection",
+    "Visible feature selection, selected-cell row dropping, adam applicability, busy lock, multifeature plot and loss all update",
+    "Committed results stay stale until Train; lbfgs clears loss; trained 390px multifeature/long equation has no page or canvas overflow",
+    "Explicit infinity fails before training with actionable row/column message, prior results retained"
+  ],
+  "errors": [],
+  "suite_seconds": 9.132920457981527
+}
+exit_code=0
+
+Execution used local Chrome outside sandbox after automatic approval. An earlier sandboxed browser inspection could not launch Chrome (SIGABRT/EPERM); this was an environment restriction rather than an application failure. The focused browser suite itself passed on its first run after approval.

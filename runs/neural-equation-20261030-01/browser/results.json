@@ -1,0 +1,45 @@
+{
+  "base_url": "http://127.0.0.1:8088",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "Single dashboard shell",
+      "status": "pass",
+      "details": "Root redirected to the sole active module; compact data/model/metric/plot/equation cards loaded without lesson or quiz rails"
+    },
+    {
+      "name": "Upload, controls, worker, and isolation",
+      "status": "pass",
+      "details": "A visible CSV upload and parameter edits trained the subprocess-backed NN, updated all plot sources/equation/metrics, and a second browser session retained independent sample state"
+    },
+    {
+      "name": "Responsive dashboard",
+      "status": "pass",
+      "details": "Desktop 1366x1000 and narrow 390x844 screenshots have no page-level horizontal overflow and the primary controls remain visible"
+    },
+    {
+      "name": "Browser errors",
+      "status": "pass",
+      "details": "No captured JavaScript page errors or primary console errors"
+    }
+  ],
+  "errors": [],
+  "viewports": [
+    {
+      "label": "neural-equation-desktop",
+      "width": 1366,
+      "height": 1000,
+      "horizontal_overflow": false,
+      "screenshot": "neural-equation-desktop.png"
+    },
+    {
+      "label": "neural-equation-mobile",
+      "width": 390,
+      "height": 844,
+      "horizontal_overflow": false,
+      "screenshot": "neural-equation-mobile.png"
+    }
+  ],
+  "browser_version": "156.0.8078.74",
+  "suite_wall_seconds": 6.407821583998157
+}

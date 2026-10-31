@@ -1,0 +1,43 @@
+{
+  "status": "pass",
+  "created_environment": "/private/tmp/neural-equation-venv-20261030",
+  "source_interpreter": "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+  "python": "3.14.0",
+  "platform": "macOS 26.1 arm64",
+  "requirements_input": "requirements.in",
+  "requirements_lock": "requirements.lock.txt",
+  "install_result": {
+    "exit_code": 0,
+    "scikit_learn_wheel": "scikit_learn-1.9.1-cp314-cp314-macosx_12_0_arm64.whl",
+    "scipy_wheel": "scipy-1.18.1-cp314-cp314-macosx_14_0_arm64.whl"
+  },
+  "pip_check": {
+    "exit_code": 0,
+    "result": "No broken requirements found."
+  },
+  "automated_tests": {
+    "exit_code": 0,
+    "shared_setup_runtime_productivity": 15,
+    "neural_module": 13,
+    "total": 28,
+    "log": "automated-tests.log"
+  },
+  "browser": {
+    "exit_code": 0,
+    "browser": "Chrome/Chromium 156.0.8078.74",
+    "result": "browser/results.json"
+  },
+  "setup_check": {
+    "exit_code": 0,
+    "roles": 4,
+    "skills": 8,
+    "errors": 0,
+    "codex_cli": "available",
+    "claude_code": "not found on PATH (optional)"
+  },
+  "notes": [
+    "The environment was newly created for this run before dependency installation.",
+    "Loopback lifecycle tests required sandbox escalation and passed.",
+    "Final operational-root verification is recorded separately after synchronization."
+  ]
+}

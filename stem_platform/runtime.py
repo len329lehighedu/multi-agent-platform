@@ -12,7 +12,7 @@ from bokeh.application import Application
 from bokeh.application.handlers.function import FunctionHandler
 from bokeh.embed import server_document
 from bokeh.server.server import Server
-from flask import Flask, abort, render_template
+from flask import Flask, abort, redirect, render_template, url_for
 from tornado.ioloop import IOLoop
 from werkzeug.serving import make_server
 
@@ -30,11 +30,18 @@ def module_metadata(root, module_id):
     for key in ("title", "subtitle"):
         if not isinstance(metadata.get(key), str) or not metadata[key].strip():
             raise ValueError(f"{module_id}: {key} must be a nonempty string")
+    presentation = metadata.get("presentation", "lesson")
+    if presentation not in {"lesson", "dashboard"}:
+        raise ValueError(f"{module_id}: presentation must be lesson or dashboard")
     for key in ("objectives", "assumptions"):
-        if not isinstance(metadata.get(key), list) or not metadata[key] or not all(isinstance(x, str) for x in metadata[key]):
+        value = metadata.get(key, [])
+        if not isinstance(value, list) or not all(isinstance(x, str) and x.strip() for x in value):
+            raise ValueError(f"{module_id}: {key} must be a string list")
+        if presentation == "lesson" and not value:
             raise ValueError(f"{module_id}: {key} must be a nonempty string list")
     questions = metadata.get("questions")
-    if not isinstance(questions, list) or len(questions) < 3:
+    minimum_questions = 3 if presentation == "lesson" else 0
+    if not isinstance(questions, list) or len(questions) < minimum_questions:
         raise ValueError(f"{module_id}: supply at least three questions with feedback")
     for item in questions:
         if not isinstance(item, dict) or not all(isinstance(item.get(k), str) and item[k].strip() for k in ("question", "answer")):
@@ -77,13 +84,17 @@ def create_app(root=ROOT, bokeh_base="http://127.0.0.1:5006", module_ids=None):
 
     @app.get("/")
     def index():
+        if len(available) == 1 and available[0].get("presentation") == "dashboard":
+            return redirect(url_for("lesson", module_id=available[0]["id"]))
         return render_template("index.html", modules=available)
 
     @app.get("/modules/<module_id>/")
     def lesson(module_id):
         if module_id not in by_id:
             abort(404)
-        return render_template("lesson.html", module=by_id[module_id],
+        module = by_id[module_id]
+        template = "dashboard.html" if module.get("presentation") == "dashboard" else "lesson.html"
+        return render_template(template, module=module,
                                script=server_document(f"{bokeh_base}/lesson/{module_id}"))
 
     @app.get("/health")

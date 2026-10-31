@@ -1,55 +1,51 @@
-# STEM Module Multi-Agent Platform
+# Data Science Multi-Agent Platform
 
-A repository workflow for building interactive STEM/data science modules with agents, reusable skills, source-backed examples, Python, Bokeh, Flask and HTML.
+The active demo is **Neural Equation Finder**: upload a numeric CSV, choose input and target columns, train a scikit-learn neural-network regressor, and inspect held-out predictions plus an explicit polynomial surrogate.
 
-The functional MVP has two runnable pilots, a reusable scaffold/host, shared Codex/Claude adapters, and recorded scientific/browser QA. Native Codex execution is verified through explicit role/skill assignment; live Claude execution and productivity gains are not established. Human acceptance remains pending.
+The neural network is a numerical predictor. The displayed equation is a separately fitted polynomial approximation of the network, with its own fidelity score. It is not automatically a recovered governing law.
 
 ## Run
 
-```bash
-cd /Users/ngoleminh/Documents/multi-agent-platform
-./run.sh
-```
-
-Open http://127.0.0.1:8080. Ctrl+C closes both local endpoints. If an environment does not yet exist:
+Verified locally with CPython 3.14.0 on macOS arm64.
 
 ```bash
-python3 -m venv .venv
+cd "/Users/ngoleminh/Documents/multi-agent-platform"
+python3.14 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock.txt
 ./run.sh
 ```
 
-The verified dependency target is CPython3.14.0/macOS arm64. This is a local development host, not a public deployment. Use `--port 8088 --bokeh-port 5018` with spaces after flag names if default ports are occupied.
+Open `http://127.0.0.1:8080`. The root route opens the single dashboard directly. Stop it with `Ctrl+C`.
 
-## Review and test
+## CSV contract
 
-- [Vietnamese walkthrough and testing guide](docs/testing-guide.vi.md) — understand the system, demo and verify it.
-- [Advisor report in English](docs/advisor-report.md) — architecture, delivery, evidence and claim limits.
-- [Current QA report](runs/mvp-completion-20261030/qa-report.md) and [evaluation report](evaluations/report.md).
-- [Technical design](docs/design-proposal.md), [runtime setup](docs/runtime-decision.md), [usage](docs/usage.md).
-- [Project instructions](AGENTS.md), canonical roles in agents/, canonical skills in .agents/skills/.
+- UTF-8 CSV with a header, 20-5,000 rows, and 2-100 columns.
+- Choose one target and one-to-four numeric input columns.
+- Empty, NaN, or unparseable selected cells are dropped and counted; explicit infinity is rejected.
+- Maximum decoded upload size is 5 MB.
+- The built-in quadratic sample works without an upload.
+
+The compact controls expose architecture, activation, solver, L2 regularization, learning rate where applicable, maximum iterations, test fraction, polynomial degree, and seed. Training runs in a bounded subprocess with a 120-second operational timeout. The dashboard reports measured duration rather than promising a fixed runtime.
+
+## Verify
 
 ```bash
 .venv/bin/python scripts/test_all.py
-.venv/bin/python scripts/check_setup.py --runtime codex
-.venv/bin/python scripts/sync_runtime.py --check
 ```
 
-## Delivered components
+For the real browser suite, install the browser test dependencies, start the server, and run:
 
-| Component | Location |
-| --- | --- |
-| Projectile pilot | modules/projectile/ |
-| Linear regression pilot | modules/linear-regression/ |
-| Shared Flask/Bokeh host and HTML/CSS lesson shell | stem_platform/, web/ |
-| Runnable starter generator | scripts/create_module.py, templates/module-scaffold/ |
-| Four role specifications and eight skills | agents/, .agents/skills/ |
-| Generated adapters | .codex/agents/, .claude/agents/, .claude/skills/ |
-| Source-backed SINDy and provisional pilot examples | corpus/ |
-| Run specs, handoffs, verification and screenshots | runs/mvp-completion-20261030/ |
-| Numerical CSV extension and controlled claim-review fixtures | evaluations/artifacts/ |
-| Matched-effort evaluation tool, no fabricated measurements | scripts/evaluate_productivity.py |
+```bash
+.venv/bin/python -m pip install -r requirements-browser.lock.txt
+.venv/bin/python scripts/test_browser.py \
+  --base-url http://127.0.0.1:8080 \
+  --browser-executable "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+```
 
-The project now lives independently under Documents and is not inside the SINDy checkout. The catalog points to the original SINDy source; that application's files were not modified. Historical smoke reports preserve their original paths as provenance. Edit canonical role/skill files then run `python3 scripts/sync_runtime.py`; generated adapters must stay synchronized.
+Run records for this build are in `runs/neural-equation-20261030-01/`. The previous projectile and linear-regression source modules were removed at the user's request; their historical evidence remains under `runs/mvp-completion-20261030/` as an audit record.
 
-Agents read examples in context and reason from the new brief; no model weights are trained. The two pilot case studies remain subject to human review. No neural-network equation-discovery module, CSV upload UI, public deployment, measured learning gain, or 30% productivity claim is included.
+## Multi-agent workflow
+
+Canonical roles are in `agents/`; canonical skills are in `.agents/skills/`. `AGENTS.md` is shared by Codex and Claude Code, while generated runtime adapters remain under `.codex/` and `.claude/`. This run used native Codex subagents with explicit role and skill files for Planner, Architect, Builder, and QA.
+
+The project uses existing modules as in-context examples rather than model-weight training. SINDy remains the source-backed corpus example. Generated modules require human review before promotion into the approved corpus.

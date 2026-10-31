@@ -1,0 +1,29 @@
+{
+  "active_modules": [
+    "neural-equation-finder"
+  ],
+  "health": {
+    "modules": [
+      "neural-equation-finder"
+    ],
+    "status": "ok"
+  },
+  "root_status": 302,
+  "root_location": "/modules/neural-equation-finder/",
+  "old_projectile_route": 404,
+  "old_regression_route": 404,
+  "original_source_hashes": {
+    "main.py": {
+      "sha256": "a4deadff78f043416ddbfd1634fb21631132b75f46919aee9901601256e770c8",
+      "matches_catalog": true
+    },
+    "engine/check_datafile.py": {
+      "sha256": "79ee0bb486c3217963785a103feea964d6385f6d25441c9e4b566a72e1ac76af",
+      "matches_catalog": true
+    },
+    "tabs/train_tab.py": {
+      "sha256": "5c22e645d6fa28cb72c9232b84262c4be1e6327f48aea8a22d7ff4ecb5d31b35",
+      "matches_catalog": true
+    }
+  }
+}

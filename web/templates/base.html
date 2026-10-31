@@ -3,12 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}STEM laboratory{% endblock %}</title>
+  <title>{% block title %}STEM VISUALIZATION {% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='lesson.css') }}">
 </head>
 <body>
-  <header class="site-header"><a class="brand" href="/">STEM <span>laboratory</span></a><span class="eyebrow">LEARN BY EXPLORING</span></header>
+  <header class="site-header"><a class="brand" href="/">STEM VISUALIZATION</a><nav aria-label="Primary"><a href="/">Modules</a></nav></header>
   <main>{% block content %}{% endblock %}</main>
-  <footer>Make a prediction. Explore the evidence. Explain what changed.</footer>
 </body>
 </html>

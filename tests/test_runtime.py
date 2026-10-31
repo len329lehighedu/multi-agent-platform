@@ -83,6 +83,20 @@ class RuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "three questions"):
             module_metadata(self.root, "starter")
 
+    def test_dashboard_presentation_hides_lesson_content_and_redirects(self):
+        path = self.root / "modules/starter/module.json"
+        data = json.loads(path.read_text())
+        data.update({"presentation": "dashboard", "objectives": [], "assumptions": [], "questions": []})
+        path.write_text(json.dumps(data))
+        self.assertEqual(module_metadata(self.root, "starter")["presentation"], "dashboard")
+        client = create_app(self.root).test_client()
+        response = client.get("/")
+        self.assertEqual(response.status_code, 302)
+        text = client.get(response.headers["Location"]).get_data(as_text=True)
+        self.assertIn("Interactive data science dashboard", text)
+        self.assertNotIn("What you will learn", text)
+        self.assertNotIn("<details>", text)
+
     def launch(self, port, bokeh_port):
         command = [sys.executable, "-u", "-c",
                    "from pathlib import Path; import sys; from stem_platform.runtime import serve; "

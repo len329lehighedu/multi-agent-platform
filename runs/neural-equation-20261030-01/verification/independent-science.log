@@ -1,0 +1,14 @@
+$ /private/tmp/neural-equation-venv-20261030/bin/python runs/neural-equation-20261030-01/verification/independent_checks.py
+test_csv_cleaning_and_rejections (__main__.IndependentChecks.test_csv_cleaning_and_rejections) ... ok
+test_linear_gate_repeatability_and_leakage (__main__.IndependentChecks.test_linear_gate_repeatability_and_leakage) ... ok
+test_multifeature_metrics_equation_and_fidelity_oracle (__main__.IndependentChecks.test_multifeature_metrics_equation_and_fidelity_oracle) ... ok
+test_quadratic_gate_and_independent_nn_execution (__main__.IndependentChecks.test_quadratic_gate_and_independent_nn_execution) ... ok
+test_solver_config_forwarding_and_objectives (__main__.IndependentChecks.test_solver_config_forwarding_and_objectives) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.113s
+
+OK
+
+exit_code=0
+

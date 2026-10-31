@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="gallery-intro"><p class="eyebrow">INTERACTIVE EXPLORATIONS</p><h1>Turn a question<br>into an experiment.</h1><p class="lead">Change a variable, follow the evidence, and discover what the model can tell you.</p></section>
+<section class="gallery-intro"><h1>Modules</h1><p class="lead">Interactive data-science tools.</p></section>
 <section class="module-grid" aria-label="Learning modules">
-{% for module in modules %}<a class="module-card" href="{{ url_for('lesson', module_id=module.id) }}"><span class="card-number">0{{ loop.index }}</span><h2>{{ module.title }}</h2><p>{{ module.subtitle }}</p><span class="card-link">Open exploration →</span></a>{% endfor %}
+{% for module in modules %}<a class="module-card" href="{{ url_for('lesson', module_id=module.id) }}"><h2>{{ module.title }}</h2><p>{{ module.subtitle }}</p><span class="card-link">Open module →</span></a>{% endfor %}
 </section>
 {% endblock %}

@@ -1,0 +1,41 @@
+Testing tests
+test_invalid_and_duplicate_measurements_fail (test_productivity.ProductivityTests.test_invalid_and_duplicate_measurements_fail) ... ok
+test_median_matched_comparison_and_unavailable_cost (test_productivity.ProductivityTests.test_median_matched_comparison_and_unavailable_cost) ... ok
+test_no_data_is_not_a_success (test_productivity.ProductivityTests.test_no_data_is_not_a_success) ... ok
+test_quality_failure_is_not_excluded_from_comparison (test_productivity.ProductivityTests.test_quality_failure_is_not_excluded_from_comparison) ... ok
+test_dashboard_presentation_hides_lesson_content_and_redirects (test_runtime.RuntimeTests.test_dashboard_presentation_hides_lesson_content_and_redirects) ... ok
+test_flask_shell_health_content_and_escaping (test_runtime.RuntimeTests.test_flask_shell_health_content_and_escaping) ... ok
+test_metadata_requires_feedback_and_valid_id (test_runtime.RuntimeTests.test_metadata_requires_feedback_and_valid_id) ... ok
+test_partial_startup_failure_releases_web_port (test_runtime.RuntimeTests.test_partial_startup_failure_releases_web_port) ... ok
+test_real_startup_both_endpoints_and_shutdown (test_runtime.RuntimeTests.test_real_startup_both_endpoints_and_shutdown) ... ok
+test_scaffold_runs_and_does_not_overwrite (test_runtime.RuntimeTests.test_scaffold_runs_and_does_not_overwrite) ... ok
+test_changed_exemplar_hash_is_detected (test_setup.SetupChecks.test_changed_exemplar_hash_is_detected) ... ok
+test_current_configuration_is_consistent (test_setup.SetupChecks.test_current_configuration_is_consistent) ... ok
+test_missing_case_study_is_detected (test_setup.SetupChecks.test_missing_case_study_is_detected) ... ok
+test_shared_skill_change_requires_claude_adapter_refresh (test_setup.SetupChecks.test_shared_skill_change_requires_claude_adapter_refresh) ... ok
+test_unknown_skill_is_detected (test_setup.SetupChecks.test_unknown_skill_is_detected) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 1.773s
+
+OK
+Testing modules/neural-equation-finder/tests
+test_config_bounds_and_solver_parameters (test_module.ParserConfigTests.test_config_bounds_and_solver_parameters) ... ok
+test_parser_boundaries_and_unsafe_input (test_module.ParserConfigTests.test_parser_boundaries_and_unsafe_input) ... ok
+test_selected_cleaning_unselected_columns_and_infinity (test_module.ParserConfigTests.test_selected_cleaning_unselected_columns_and_infinity) ... ok
+test_selection_constants_and_insufficient_rows (test_module.ParserConfigTests.test_selection_constants_and_insufficient_rows) ... ok
+test_multifeature_and_loss_semantics (test_module.ScienceTests.test_multifeature_and_loss_semantics) ... ok
+test_predeclared_linear_fixture (test_module.ScienceTests.test_predeclared_linear_fixture) ... ok
+test_predeclared_quadratic_fixture (test_module.ScienceTests.test_predeclared_quadratic_fixture) ... ok
+test_repeatability_and_independent_metrics_and_polynomial (test_module.ScienceTests.test_repeatability_and_independent_metrics_and_polynomial) ... ok
+test_train_scalers_and_held_out_perturbation (test_module.ScienceTests.test_train_scalers_and_held_out_perturbation) ... ok
+test_cancel_running_process_reaps_it_without_publication (test_module.WorkerUITests.test_cancel_running_process_reaps_it_without_publication) ... ok
+test_real_worker_result_and_failure (test_module.WorkerUITests.test_real_worker_result_and_failure) ... ok
+test_two_documents_upload_solver_busy_success_and_failure (test_module.WorkerUITests.test_two_documents_upload_solver_busy_success_and_failure) ... ok
+test_worker_timeout_and_cancel (test_module.WorkerUITests.test_worker_timeout_and_cancel) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 1.970s
+
+OK
+All automated non-browser suites passed.
