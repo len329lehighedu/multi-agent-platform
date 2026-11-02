@@ -3,6 +3,11 @@
   "presentation": "dashboard",
   "title": "Neural Equation Finder",
   "subtitle": "Upload data. Train a neural predictor. Inspect a polynomial surrogate.",
+  "instructions": [
+    "Use the built-in sample or upload a numeric CSV, then choose one target and one to four input features.",
+    "Choose the model settings and press Train; measured progress and any convergence warning appear in the workspace.",
+    "Compare held-out predictions, residuals, and equation fidelity before interpreting the polynomial surrogate."
+  ],
   "objectives": ["Select numeric features and a scalar target.", "Evaluate held-out neural predictions.", "Distinguish polynomial fidelity from neural predictive quality."],
   "assumptions": ["Numeric tabular regression with 1–4 features and 20–5,000 usable rows.", "Training-only standardization and a deterministic held-out split.", "The explicit equation approximates the neural network; it does not establish a governing law."],
   "questions": []

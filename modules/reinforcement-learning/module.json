@@ -1,0 +1,29 @@
+{
+  "id": "reinforcement-learning",
+  "presentation": "lesson",
+  "title": "RL Gridworld Lab",
+  "subtitle": "Watch a small agent learn from actions, rewards, and repeated episodes.",
+  "instructions": [
+    "Start with Step one transition and follow the highlighted state, action, reward, and Q update.",
+    "Use Train episodes to build a policy, then inspect the arrows, episode returns, and frozen evaluation.",
+    "Change alpha, gamma, or epsilon one at a time and press Reset Q before comparing runs."
+  ],
+  "objectives": [
+    "Identify the state, action, reward, and next state in one transition.",
+    "Explain how a Q value changes after nonterminal and terminal transitions.",
+    "Describe how alpha, gamma, and epsilon affect learning.",
+    "Judge a learned policy from repeated evaluation outcomes rather than one success."
+  ],
+  "assumptions": [
+    "The 4 × 4 world is fully observed and movement is deterministic.",
+    "Every ordinary move rewards −0.05, the goal +1, and the hazard −1; episodes stop after 40 moves.",
+    "Q values start at zero. Evaluation freezes Q and turns exploration off.",
+    "This compact experiment does not claim that one run proves an optimal or general policy."
+  ],
+  "questions": [
+    {"question": "A goal transition has old Q = 0.20, alpha = 0.5, and reward +1. What future value and new Q are used?", "answer": "The future value is zero because the goal is terminal. The new value is 0.20 + 0.5 × (1 − 0.20) = 0.60."},
+    {"question": "What does increasing gamma change?", "answer": "It gives more weight to the estimated value of the next state in nonterminal updates. It does not change movement or immediate rewards."},
+    {"question": "Why can epsilon above zero help when every Q value starts at zero?", "answer": "Exploration deliberately tries random actions, producing experience that can separate initially tied action values. The trace still depends on the seed."},
+    {"question": "One training episode reaches the goal. Does that prove the policy is reliable or optimal?", "answer": "No. Inspect repeated greedy evaluations and the full policy/Q display. One outcome is too little evidence for reliability or optimality."}
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "run_id": "rl-gridworld-20261101-01",
+  "module_id": "reinforcement-learning",
+  "module_path": "modules/reinforcement-learning",
+  "created_at": "2026-11-01T17:50:15Z",
+  "status": "ready-for-review",
+  "runtime": {
+    "name": "Codex desktop native subagents",
+    "version": null,
+    "model": "inherited session model"
+  },
+  "limits": {
+    "repair_cycles": 1,
+    "resource_budget": "CPU only; maximum 500 episodes per click and 40 steps per episode; compact four-stage run"
+  },
+  "assumptions": [
+    "Introductory undergraduate audience",
+    "English interface matching the existing platform",
+    "Fixed deterministic 4x4 map and tabular Q-learning only"
+  ],
+  "stages": [
+    {
+      "role": "stem-learning-planner",
+      "execution_reference": "/root/rl_planner",
+      "status": "ready",
+      "artifact": "runs/rl-gridworld-20261101-01/learning-spec.md"
+    },
+    {
+      "role": "stem-architect",
+      "execution_reference": "/root/rl_architect",
+      "status": "ready",
+      "artifact": "runs/rl-gridworld-20261101-01/technical-plan.md"
+    },
+    {
+      "role": "stem-builder",
+      "execution_reference": "/root/rl_builder",
+      "status": "ready-for-qa",
+      "artifact": "runs/rl-gridworld-20261101-01/build-report.md"
+    },
+    {
+      "role": "stem-qa-reviewer",
+      "execution_reference": "/root/rl_qa",
+      "status": "passed",
+      "artifact": "runs/rl-gridworld-20261101-01/qa-report.md"
+    }
+  ],
+  "handoffs": [
+    "runs/rl-gridworld-20261101-01/handoff-01-planner-architect.md",
+    "runs/rl-gridworld-20261101-01/handoff-02-architect-builder.md",
+    "runs/rl-gridworld-20261101-01/handoff-03-builder-qa.md",
+    "runs/rl-gridworld-20261101-01/handoff-04-qa-review.md"
+  ],
+  "exemplars_used": [
+    "corpus/sindy.md and source revision d58a9a9b315273e2675216593a1a4bb86a57ccb4",
+    "modules/neural-equation-finder as current implementation context",
+    "templates/module-scaffold"
+  ],
+  "human_feedback": [],
+  "limitations": [
+    "Generated module requires human instructional review",
+    "No deployment requested"
+  ],
+  "human_acceptance": "pending"
+}

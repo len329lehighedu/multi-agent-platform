@@ -10,7 +10,7 @@ Specify the question, desired output representation, scientific assumptions, inp
 
 ## Learner experience
 
-Describe inputs/controls, interactions, plots, output interpretation, errors, assessment, and presentation preferences. List exemplar modules to inspect without requiring a literal clone.
+Describe a short ordered set of usage instructions for `module.json`, inputs/controls, interactions, plots, output interpretation, errors, assessment, and presentation preferences. The shared UI displays the usage guide above a full-width workspace and keeps objectives, assumptions, and assessment content in metadata for QA rather than persistent page rails. List exemplar modules to inspect without requiring a literal clone.
 
 ## Execution constraints
 

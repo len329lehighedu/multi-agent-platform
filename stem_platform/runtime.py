@@ -39,6 +39,10 @@ def module_metadata(root, module_id):
             raise ValueError(f"{module_id}: {key} must be a string list")
         if presentation == "lesson" and not value:
             raise ValueError(f"{module_id}: {key} must be a nonempty string list")
+    instructions = metadata.get("instructions")
+    if not isinstance(instructions, list) or not instructions or not all(
+            isinstance(item, str) and item.strip() for item in instructions):
+        raise ValueError(f"{module_id}: instructions must be a nonempty string list")
     questions = metadata.get("questions")
     minimum_questions = 3 if presentation == "lesson" else 0
     if not isinstance(questions, list) or len(questions) < minimum_questions:

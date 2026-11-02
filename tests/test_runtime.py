@@ -66,7 +66,12 @@ class RuntimeTests(unittest.TestCase):
         text = response.get_data(as_text=True)
         self.assertIn("&lt;script&gt;", text)
         self.assertNotIn("<script>alert(1)", text)
-        self.assertEqual(text.count("<details>"), 3)
+        self.assertIn("How to use this module", text)
+        self.assertIn("Back to home", text)
+        self.assertNotIn("What you will learn", text)
+        self.assertNotIn("Know the model", text)
+        self.assertNotIn("CHECK YOUR UNDERSTANDING", text)
+        self.assertNotIn("<details>", text)
         self.assertIn("/lesson/starter/autoload.js", text)
         self.assertEqual(client.get("/modules/missing/").status_code, 404)
         asset = client.get("/static/lesson.css")
@@ -82,6 +87,11 @@ class RuntimeTests(unittest.TestCase):
         path.write_text(json.dumps(data))
         with self.assertRaisesRegex(ValueError, "three questions"):
             module_metadata(self.root, "starter")
+        data = json.loads((ROOT / "templates/module-scaffold/module.json").read_text())
+        data["instructions"] = []
+        path.write_text(json.dumps(data))
+        with self.assertRaisesRegex(ValueError, "instructions"):
+            module_metadata(self.root, "starter")
 
     def test_dashboard_presentation_hides_lesson_content_and_redirects(self):
         path = self.root / "modules/starter/module.json"
@@ -94,7 +104,11 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         text = client.get(response.headers["Location"]).get_data(as_text=True)
         self.assertIn("Interactive data science dashboard", text)
+        self.assertIn("How to use this module", text)
+        self.assertIn("Back to home", text)
         self.assertNotIn("What you will learn", text)
+        self.assertNotIn("Know the model", text)
+        self.assertNotIn("CHECK YOUR UNDERSTANDING", text)
         self.assertNotIn("<details>", text)
 
     def launch(self, port, bokeh_port):

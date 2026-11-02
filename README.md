@@ -1,6 +1,9 @@
 # Data Science Multi-Agent Platform
 
-The active demo is **Neural Equation Finder**: upload a numeric CSV, choose input and target columns, train a scikit-learn neural-network regressor, and inspect held-out predictions plus an explicit polynomial surrogate.
+The home screen now lists two interactive modules:
+
+- **Neural Equation Finder**: upload a numeric CSV, train a neural regressor, and inspect held-out predictions plus a polynomial surrogate.
+- **RL Gridworld Lab**: step through deterministic actions and rewards, train a seeded tabular Q-learning agent, and inspect its Q updates, policy, and repeated evaluation outcomes.
 
 The neural network is a numerical predictor. The displayed equation is a separately fitted polynomial approximation of the network, with its own fidelity score. It is not automatically a recovered governing law.
 
@@ -15,7 +18,7 @@ python3.14 -m venv .venv
 ./run.sh
 ```
 
-Open `http://127.0.0.1:8080`. The root route opens the single dashboard directly. Stop it with `Ctrl+C`.
+Open `http://127.0.0.1:8080` for the module gallery. Stop it with `Ctrl+C`.
 
 ## CSV contract
 

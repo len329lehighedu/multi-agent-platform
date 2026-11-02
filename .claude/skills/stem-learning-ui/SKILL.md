@@ -11,4 +11,6 @@ Design the learner's path from scientific question to inputs, action, result, an
 
 Choose controls with valid ranges, defaults, units, help text, and visible errors. Distinguish fit, test, and prediction outputs. For neural training, explain progress, runtime limits, failures, and what the learned output means without promising an unmeasured duration.
 
+Use the platform's shared module shell: a visible Back to home link, the module title and subtitle, a compact ordered "How to use this module" guide sourced from `module.json`, followed by the interactive workspace at the full available page width. Keep objectives, assumptions, assessments, and their answers in module metadata and specifications for validation and QA; do not render persistent "What you will learn", "Know the model", or quiz sections around the workspace unless a user explicitly requests them. Avoid repeating the module title inside the Bokeh document when the shared shell already shows it.
+
 Use readable axes and legends, semantic HTML, keyboard-usable controls, sufficient contrast, and meaning beyond color alone. Verify intended viewport behavior and that explanatory content matches the plots. Learner-facing text should describe the science, not the multi-agent pipeline.

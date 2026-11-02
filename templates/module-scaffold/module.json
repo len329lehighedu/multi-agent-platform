@@ -1,6 +1,11 @@
 {
   "title": "Parameter exploration",
   "subtitle": "Predict, change a coefficient, and explain the graph.",
+  "instructions": [
+    "Read the scientific question and predict how the output will change.",
+    "Change one control at a time and observe the interactive result.",
+    "Compare the result with your prediction and explain the evidence."
+  ],
   "objectives": ["Explain how the coefficient changes a straight line's slope."],
   "assumptions": ["This starter uses y = a × x with dimensionless variables and no intercept."],
   "questions": [

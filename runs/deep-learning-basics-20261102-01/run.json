@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "run_id": "deep-learning-basics-20261102-01",
+  "module_id": "deep-learning-basics",
+  "module_path": "modules/deep-learning-basics",
+  "created_at": "2026-11-02T21:24:58Z",
+  "status": "brief-ready",
+  "runtime": {
+    "name": "Codex desktop native subagents with explicit canonical role and skill paths",
+    "version": "not available",
+    "model": "not exposed"
+  },
+  "limits": {
+    "repair_cycles": 2,
+    "resource_budget": "One lightweight CPU fit and bounded verification fits; at most 500 rows; no GPU or external service"
+  },
+  "assumptions": [
+    "Introductory audience",
+    "Research inputs mean a two-column x,y CSV",
+    "The output is a numerical prediction curve, not a symbolic equation"
+  ],
+  "stages": [],
+  "handoffs": [],
+  "exemplars_used": [],
+  "human_feedback": [],
+  "limitations": [],
+  "human_acceptance": "pending"
+}

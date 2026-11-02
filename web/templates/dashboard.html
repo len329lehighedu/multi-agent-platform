@@ -1,7 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}{{ module.title }} · STEM VISUALIZATION{% endblock %}
+{% block main_class %}module-main{% endblock %}
 {% block content %}
-<section class="dashboard-workspace" aria-label="Interactive data science dashboard">
+<a class="back-link" href="/">← Back to home</a>
+<section class="module-intro">
+  <p class="eyebrow">MODULE GUIDE</p>
+  <h1>{{ module.title }}</h1>
+  <p class="lead">{{ module.subtitle }}</p>
+  <div class="module-guide"><h2>How to use this module</h2><ol>{% for instruction in module.instructions %}<li>{{ instruction }}</li>{% endfor %}</ol></div>
+</section>
+<section class="module-workspace dashboard-workspace" aria-label="Interactive data science dashboard">
   {{ script | safe }}
   <noscript>Enable JavaScript to use this dashboard.</noscript>
 </section>

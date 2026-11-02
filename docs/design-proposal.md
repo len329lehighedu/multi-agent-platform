@@ -152,7 +152,7 @@ Test skill selection and use with at least three representative cases across the
 
 ## 7. Shared module contract and proposed structure
 
-Every module must define its scientific assumptions, inputs and valid ranges, outputs and units, expected interactions, learning objectives, assessment, and verification requirements. Avoid shared mutable scientific state between learner sessions.
+Every module must define its scientific assumptions, inputs and valid ranges, outputs and units, expected interactions, short ordered usage instructions, learning objectives, assessment, and verification requirements. The shared page shell presents the title, usage guide, Back to home navigation, and then a full-width interactive workspace. Objectives, assumptions, questions, and answers remain module metadata for planning and QA without occupying persistent side rails or quiz sections. Avoid shared mutable scientific state between learner sessions.
 
 The scaffold should separate computation, Bokeh UI, Flask/HTML, and tests. It must document the browser's connection to the Bokeh service as well as the Flask entry point. A Flask HTTP success response alone does not verify a working embedded Bokeh interaction.
 

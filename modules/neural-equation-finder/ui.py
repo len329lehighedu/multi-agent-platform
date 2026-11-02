@@ -371,14 +371,9 @@ def build_document(doc):
     sidebar = card(section("Data", data_body), section("Model", model_body), section("Advanced", advanced_body, opened=False), train, name="module_sidebar")
     sidebar.styles.update(position="sticky", top="14px", align_self="start")
 
-    title = Div(text='<div class="result-title"><span class="module-kicker">MODULE</span><h1>Neural Networks Equation Finding</h1></div>', sizing_mode="stretch_width", stylesheets=_content_stylesheet())
     status_bar = row(status, warning_button, sizing_mode="stretch_width", min_width=0)
     warning_actions = row(double_iterations, scale_features, sizing_mode="stretch_width")
-    header_row = row(title, status_bar, sizing_mode="stretch_width", min_width=0, stylesheets=[InlineStyleSheet(css="""
-        :host { display:grid !important; grid-template-columns:minmax(320px,1fr) auto !important; gap:16px; align-items:center; }
-        @media (max-width:900px) { :host { grid-template-columns:minmax(0,1fr) !important; } }
-    """)])
-    result_header = column(header_row, warning_hint, warning_actions, sizing_mode="stretch_width")
+    result_header = column(status_bar, warning_hint, warning_actions, sizing_mode="stretch_width")
     kpi_strip = row(*kpi_models, sizing_mode="stretch_width", min_width=0, visible=False, stylesheets=[InlineStyleSheet(css="""
         :host { display:grid !important; grid-template-columns:repeat(6,minmax(0,1fr)) !important; gap:9px; }
         @media (max-width:900px) { :host { grid-template-columns:repeat(2,minmax(0,1fr)) !important; } }
