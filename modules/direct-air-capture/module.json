@@ -1,0 +1,34 @@
+{
+  "id": "direct-air-capture",
+  "presentation": "lesson",
+  "title": "Direct Air Capture Packed-Bed Lab",
+  "subtitle": "Follow a CO2 adsorption front through mass and energy balances.",
+  "instructions": [
+    "Predict the baseline, choose the six operating conditions, then run the 24-hour adsorption simulation.",
+    "Read the breakthrough curves and move the selected-time control through the linked concentration, loading, temperature, and rate profiles.",
+    "Change one input at a time; compare residence time, capture, and temperature, then check numerical mass closure before interpreting the result."
+  ],
+  "objectives": [
+    "Trace convection, adsorption, solid loading, and heat release through the coupled process.",
+    "Distinguish an axial profile at one time from outlet breakthrough over time.",
+    "Predict how bed volume and flow alter residence time and breakthrough.",
+    "Explain why capture falls as finite sorbent capacity is used.",
+    "Interpret adsorption heat release and the assumed wall heat-transfer scenario.",
+    "Use units, limiting cases, assumptions, and mass closure to judge a numerical result responsibly."
+  ],
+  "assumptions": [
+    "Dry, one-dimensional plug flow with constant velocity/properties and no dispersion, pressure drop, radial gradients, or regeneration.",
+    "Gas and solid share one local temperature; initial bed gas equals feed and the regenerated sorbent starts unloaded.",
+    "Wall material names select assumed overall heat-transfer coefficients for comparison.",
+    "Toth parameters are literature-informed, while ambient-pressure kinetic magnitude is pedagogically calibrated and not experimentally validated.",
+    "Numerical mass closure tests accounting under the model; it does not establish real DAC accuracy or permanent carbon removal."
+  ],
+  "questions": [
+    {"question":"Why can early outlet CO2 be lower than inlet?","answer":"CO2 transfers from the gas into available solid capacity; it accumulates as sorbent loading rather than being destroyed."},
+    {"question":"What generally happens when flow increases for the same bed?","answer":"Gas residence time falls, usually weakening capture and advancing breakthrough under the declared kinetics and horizon."},
+    {"question":"Why does capture fall near saturation?","answer":"Available capacity and the forward adsorption driving term decrease as q/q_s approaches one, so more CO2 exits."},
+    {"question":"Why can an exothermic adsorption front warm the bed?","answer":"Adsorption heat becomes sensible heating while convection and wall heat exchange redistribute and moderate it."},
+    {"question":"Does excellent numerical closure prove real-unit accuracy?","answer":"No. Closure supports internal accounting; experimental validation still needs defensible parameters and measurements."},
+    {"question":"What does wall material change in this module?","answer":"It selects a documented assumed effective heat-transfer coefficient, not a universal value determined by material identity alone."}
+  ]
+}
