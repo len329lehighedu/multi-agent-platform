@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Module Foundry</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">MF</span> Module Foundry <span class="tag">Developer console</span></div>
+    <div class="controls">
+      <span id="run-pill" class="pill" hidden></span>
+      <label class="sr-only" for="provider">Model provider</label>
+      <select id="provider" title="Model provider"></select>
+      <button id="new-run" class="ghost" type="button">New run</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card chat" aria-label="Conversation">
+      <div id="messages" class="messages" aria-live="polite">
+        <div class="empty">
+          <h2>Describe a module to build</h2>
+          <p>The orchestrator hands the work to specialist agents. You will see every handoff on the right.</p>
+          <button id="example" class="ghost" type="button">Use an example prompt</button>
+        </div>
+      </div>
+      <form id="composer" class="composer">
+        <div id="hint" class="hint" hidden></div>
+        <textarea id="prompt" rows="3" placeholder="e.g. A module that fits a SINDy model to pendulum data, tests it, and predicts" required></textarea>
+        <div class="composer-row">
+          <span id="status" class="status">Ready</span>
+          <button id="send" type="submit">Send</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="side">
+      <ol id="stages" class="stages" aria-label="Run stage"></ol>
+      <div class="card graph-card">
+        <svg id="graph" viewBox="0 0 680 440" role="img" aria-label="Agent workflow graph"></svg>
+      </div>
+      <div class="card timeline-card">
+        <h2>Run timeline</h2>
+        <ol id="timeline" class="timeline"><li class="muted">Events appear here as agents work.</li></ol>
+      </div>
+    </section>
+  </main>
+  <template id="empty-template">
+    <div class="empty">
+      <h2>Describe a module to build</h2>
+      <p>The orchestrator hands the work to specialist agents. You will see every handoff on the right.</p>
+      <button id="example" class="ghost" type="button">Use an example prompt</button>
+    </div>
+  </template>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

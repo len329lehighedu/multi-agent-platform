@@ -1,54 +1,84 @@
-# Data Science Multi-Agent Platform
+# Module Foundry
 
-The home screen now lists two interactive modules:
+API-first multi-agent development environment for building reviewable STEM learning modules.
 
-- **Neural Equation Finder**: upload a numeric CSV, train a neural regressor, and inspect held-out predictions plus a polynomial surrogate.
-- **RL Gridworld Lab**: step through deterministic actions and rewards, train a seeded tabular Q-learning agent, and inspect its Q updates, policy, and repeated evaluation outcomes.
+This repository is being rebuilt as a product that next year's cohort can use through a chat interface. A user creates a run, talks with specialist agents, reviews decisions, watches implementation and QA progress, and receives a module workspace plus traceable evidence.
 
-The neural network is a numerical predictor. The displayed equation is a separately fitted polynomial approximation of the network, with its own fidelity score. It is not automatically a recovered governing law.
+The current foundation provides:
 
-## Run
+- persistent runs, messages, stages, and event history;
+- an HTTP API for a future web chat client;
+- a framework-neutral model-provider interface;
+- an agent catalog loaded from versioned repository configuration;
+- isolated per-run workspace directories;
+- explicit, validated workflow transitions;
 
-Verified locally with CPython 3.14.0 on macOS arm64.
+The developer console at `/` shows the orchestrator handing work to the Planner, Architect, Builder and QA agents, with a live graph, stage tracker and event timeline. This slice produces a plan only: no agent writes code or runs tools yet. The Planner may pause the run to ask you one question; your answer resumes it.
 
-```bash
-cd "/Users/ngoleminh/Documents/multi-agent-platform"
-python3.14 -m venv .venv
-.venv/bin/python -m pip install -r requirements.lock.txt
-./run.sh
+## Architecture
+
+```text
+Web chat / cohort UI
+        │ HTTP + event stream
+        ▼
+Module Foundry API
+        │
+        ├── run store
+        ├── orchestrator state machine
+        ├── agent catalog
+        ├── model-provider adapter
+        └── workspace manager
+                │
+                ▼
+        isolated module workspace
 ```
 
-Open `http://127.0.0.1:8080` for the module gallery. Stop it with `Ctrl+C`.
+See [architecture.md](docs/architecture.md), [product-vision.md](docs/product-vision.md),
+[agent-contract.md](docs/agent-contract.md), and [api-contract.md](docs/api-contract.md).
 
-## CSV contract
+## Run locally
 
-- UTF-8 CSV with a header, 20-5,000 rows, and 2-100 columns.
-- Choose one target and one-to-four numeric input columns.
-- Empty, NaN, or unparseable selected cells are dropped and counted; explicit infinity is rejected.
-- Maximum decoded upload size is 5 MB.
-- The built-in quadratic sample works without an upload.
+The first API adapter uses the already verified Flask dependency. The domain and orchestration packages do not depend on Flask.
 
-The compact controls expose architecture, activation, solver, L2 regularization, learning rate where applicable, maximum iterations, test fraction, polynomial degree, and seed. Training runs in a bounded subprocess with a 120-second operational timeout. The dashboard reports measured duration rather than promising a fixed runtime.
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.lock.txt
+PYTHONPATH=src .venv/bin/python -m module_platform
+```
+
+The API listens on `http://127.0.0.1:8080` by default. Open it to use the console.
+
+Providers (choose in the console header or per run via the API):
+
+- `openai` — live calls; needs `OPENAI_API_KEY` (and optional `OPENAI_MODEL`) in the ignored `.env`.
+- `replay` — a recorded run from `config/replay/demo.json`; works offline, useful as a demo fallback. Set `REPLAY_DELAY` (seconds, default 1.2) to pace it.
+
+Create a run:
+
+```bash
+curl -X POST http://127.0.0.1:8080/api/v1/runs \
+  -H 'Content-Type: application/json' \
+  -d '{"goal":"Build an interactive heat-transfer module"}'
+```
 
 ## Verify
 
 ```bash
-.venv/bin/python scripts/test_all.py
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
 ```
 
-For the real browser suite, install the browser test dependencies, start the server, and run:
+## Repository map
 
-```bash
-.venv/bin/python -m pip install -r requirements-browser.lock.txt
-.venv/bin/python scripts/test_browser.py \
-  --base-url http://127.0.0.1:8080 \
-  --browser-executable "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+```text
+apps/web/                 developer console (workflow viewer)
+config/agents/            versioned agent definitions
+config/skills/            reusable domain procedures
+config/replay/            recorded agent responses for offline demos
+docs/                     product, architecture, and API decisions
+src/module_platform/      API-independent orchestration core + Flask adapter
+tests/                    foundation acceptance tests
+var/                      local run state and workspaces (ignored)
 ```
 
-Run records for this build are in `runs/neural-equation-20261030-01/`. The previous projectile and linear-regression source modules were removed at the user's request; their historical evidence remains under `runs/mvp-completion-20261030/` as an audit record.
+Deferred work is tracked in [docs/deferred-decisions.md](docs/deferred-decisions.md).
 
-## Multi-agent workflow
-
-Canonical roles are in `agents/`; canonical skills are in `.agents/skills/`. `AGENTS.md` is shared by Codex and Claude Code, while generated runtime adapters remain under `.codex/` and `.claude/`. This run used native Codex subagents with explicit role and skill files for Planner, Architect, Builder, and QA.
-
-The project uses existing modules as in-context examples rather than model-weight training. SINDy remains the source-backed corpus example. Generated modules require human review before promotion into the approved corpus.

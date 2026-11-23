@@ -1,7 +1,10 @@
 __pycache__/
 *.py[cod]
 .venv/
-.claude/settings.local.json
-
 .DS_Store
-output/
+.env
+var/*
+!var/.gitkeep
+coverage.xml
+.coverage
+htmlcov/

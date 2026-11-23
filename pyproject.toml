@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "module-foundry"
+version = "0.1.0"
+description = "API-first multi-agent environment for building STEM learning modules"
+requires-python = ">=3.11"
+dependencies = ["Flask==3.1.2", "openai>=1.0", "python-dotenv>=1.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

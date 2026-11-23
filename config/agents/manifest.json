@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "agents": [
+    {
+      "id": "orchestrator",
+      "display_name": "Orchestrator",
+      "prompt": "orchestrator.md",
+      "skills": []
+    },
+    {
+      "id": "learning_planner",
+      "display_name": "Learning Planner",
+      "prompt": "stem-learning-planner.md",
+      "skills": ["stem-lesson-design", "stem-module-examples"]
+    },
+    {
+      "id": "scientific_architect",
+      "display_name": "Scientific Architect",
+      "prompt": "stem-architect.md",
+      "skills": ["stem-scientific-python", "stem-flask-bokeh"]
+    },
+    {
+      "id": "builder",
+      "display_name": "Module Builder",
+      "prompt": "stem-builder.md",
+      "skills": ["stem-learning-ui", "stem-bokeh-interaction", "stem-flask-bokeh"]
+    },
+    {
+      "id": "qa_reviewer",
+      "display_name": "QA Reviewer",
+      "prompt": "stem-qa-reviewer.md",
+      "skills": ["stem-module-verification"]
+    }
+  ]
+}

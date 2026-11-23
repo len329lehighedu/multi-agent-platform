@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "module-foundry",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["PYTHONPATH=src", "REPLAY_DELAY=1.0", ".venv/bin/python", "-m", "module_platform"],
+      "port": 8080
+    }
+  ]
+}

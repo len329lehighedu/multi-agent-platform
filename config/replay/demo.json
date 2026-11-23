@@ -1,0 +1,42 @@
+{
+  "learning_planner": [
+    {
+      "message": "Audience: upper-level undergraduates who know basic calculus and some Python. Objective: by the end, a learner can explain how sparse regression recovers a governing equation from noisy time-series data, and judge when the recovered model can be trusted. Core interaction: the learner picks a dataset, adjusts noise, fits the model, then compares predictions on held-out data.",
+      "question": "Should learners start from a built-in simulated system (e.g. a damped pendulum where the true equation is known) or upload their own CSV?",
+      "handoff_summary": "Draft brief ready; waiting on dataset source decision."
+    },
+    {
+      "message": "Thanks, that settles the data source. Final brief: learners start with a built-in simulated system with a known equation, can add noise, then fit, test on a held-out time window, and predict forward. An optional CSV upload is listed as a stretch goal. Success means the learner can state why a fitted equation does or does not match the truth.",
+      "question": null,
+      "handoff_summary": "Audience: undergrads. Objective: recover and critique an equation from noisy data. Flow: choose data, add noise, fit, test on held-out window, predict. Known-truth simulated data first; CSV upload is a stretch goal."
+    }
+  ],
+  "scientific_architect": [
+    {
+      "message": "Proposed method: SINDy with a polynomial feature library and sequentially thresholded least squares. Data contract: a CSV with a time column plus state columns, uniformly sampled. Split: train on the first 70% of time, test on the rest. Metrics: derivative fit R-squared and multi-step rollout error. Verification plan: on noise-free simulated data the known coefficients must be recovered within tolerance, and error must grow smoothly as noise increases.",
+      "question": null,
+      "handoff_summary": "Method: SINDy (poly library, STLSQ). Time-ordered 70/30 split. Metrics: derivative R2 and rollout error. Check: recover known coefficients on clean data; error degrades smoothly with noise."
+    }
+  ],
+  "builder": [
+    {
+      "message": "Build plan only; no files have been created. 1) module.json and requirements.txt with pinned dependencies. 2) engine.py: dataset generation, noise, time-ordered split, fit, predict, rollout. 3) tests/test_engine.py: coefficient recovery and noise-sweep tests written first. 4) ui.py: controls for system, noise, and threshold, plus plots of fit and held-out prediction. 5) README with limitations.",
+      "question": null,
+      "handoff_summary": "Plan: module.json, engine.py, tests first, ui.py, README. Nothing built yet."
+    }
+  ],
+  "qa_reviewer": [
+    {
+      "message": "Verification checklist, none of it run yet: (science) known coefficients recovered on clean data; (robustness) rollout error versus noise level; (runtime) clean install and tests pass; (browser) controls update plots, no console errors; (instruction) each interaction maps to the stated objective. Any failed mandatory item blocks review readiness.",
+      "question": null,
+      "handoff_summary": "Checklist defined across science, robustness, runtime, browser, and instruction. All items not run."
+    }
+  ],
+  "orchestrator": [
+    {
+      "message": "Here is where we are. The Learning Planner defined the audience, objective, and flow. The Scientific Architect chose SINDy with a time-ordered split and a recovery check. The Builder outlined the files and the QA Reviewer listed what it will verify. This is a plan only: nothing has been built, run, or tested. Approve the plan to continue to implementation.",
+      "question": null,
+      "handoff_summary": "Run summary delivered."
+    }
+  ]
+}
