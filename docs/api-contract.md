@@ -36,10 +36,33 @@ The target is optional. The orchestrator remains responsible for final routing.
 `POST /runs/{run_id}/chat` accepts `{"content":"..."}` and returns HTTP 202.
 The first call starts the planning workflow; if the run is `awaiting_user`, the
 content is the answer and the workflow resumes. Work runs in a background thread.
-A finished or already-working run returns 400. The workflow produces a plan only.
+A finished or already-working run returns 400. The workflow ends with a project plan for approval and builds nothing.
 
 `POST /runs` also accepts an optional `"provider"` (`openai` or `replay`);
 `GET /config` lists available providers and the default.
+
+## Projects
+
+`POST /projects` `{"name": "..."}` creates a project (names are unique, case-insensitive, at most 80
+characters). `GET /projects` lists projects with `run_count`, `versions` (completed builds), `files`
+and their `runs`; `GET /projects/{id}` returns one. `POST /runs` accepts `project_id` (and an optional `provider`; the console no longer shows a provider picker, so the server default from `MODULE_FOUNDRY_PROVIDER` applies): the run is a
+`module` run when the project has no module yet, otherwise a `feature` run on the existing module.
+Runs without `project_id` keep their own private workspace. `DELETE /projects/{id}` permanently deletes the project, its module files and all its runs
+(`{"deleted": true, "runs_removed": n}`); it returns 400 while any of its runs is working. Unknown
+projects return 404 `project_not_found`.
+
+## Approval, build and changes
+
+`POST /runs/{run_id}/approve` (no body) starts the build after `plan.ready`; HTTP 202. It returns 400
+when there is no plan, the plan was already approved, or the run is not waiting for review.
+
+After `build.completed` or `build.failed`, `POST /runs/{run_id}/chat` is a change request for the
+Builder (`revision.requested`). Before the plan is approved, chat returns 400.
+
+`GET /runs/{run_id}/files` lists the module files; `GET /runs/{run_id}/files/{path}` returns one as
+plain text. Events: `plan.approved`, `build.files_written`, `build.checks` (`passed`, `command`,
+`output`, `round`), `build.completed`, `build.failed`, `revision.requested`, `revision.completed`,
+`revision.failed`.
 
 ## Events
 
@@ -48,9 +71,15 @@ A finished or already-working run returns 400. The workflow produces a plan only
 `event: end` and closes when the run is no longer `active` (paused, finished or
 failed); reopen it from the last sequence after the next user message.
 
-Workflow event types: `workflow.started`, `handoff.requested`, `agent.started`,
-`agent.completed`, `question.asked`, `workflow.paused`, `question.answered`,
-`handoff.returned`, `workflow.completed`, `agent.failed`.
+Workflow event types: `workflow.started`, `handoff.requested`, `agent.started`
+(lists the skills loaded and the estimated prompt size), `agent.completed`,
+`artifact.rejected`, `artifact.accepted`, `plan.ready`, `question.asked`,
+`workflow.paused`, `question.answered`, `handoff.returned`, `workflow.completed`,
+`agent.failed`.
+
+`GET /runs/{run_id}/artifacts` returns the accepted artifacts by name
+(`task_spec`, `research_brief`, `design_spec`, `test_plan`, `project_plan`).
+See [process.md](process.md).
 
 `GET /runs/{run_id}/events?after=0`
 

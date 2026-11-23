@@ -37,7 +37,7 @@ class ApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         agents = response.get_json()["items"]
-        self.assertEqual(agents[0]["id"], "orchestrator")
+        self.assertEqual(agents[0]["id"], "project_manager")
         self.assertNotIn("prompt", agents[0])
 
     def test_run_message_transition_and_event_cursor(self):
@@ -47,7 +47,7 @@ class ApiTests(unittest.TestCase):
 
         response = self.client.post(
             f"/api/v1/runs/{run['id']}/messages",
-            json={"content": "Use a packed-bed example", "target_agent": "scientific_architect"},
+            json={"content": "Use a packed-bed example", "target_agent": "researcher"},
         )
         self.assertEqual(response.status_code, 201)
 

@@ -8,3 +8,5 @@ var/*
 coverage.xml
 .coverage
 htmlcov/
+compile.txt
+

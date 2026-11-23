@@ -18,7 +18,75 @@ changes arrive as a reviewable change set, merging into main needs human approva
 and runs declare the paths they will touch to avoid conflicts. Modules are released
 as versioned tags that viewers run.
 
+Refined proposal (Nov 2026), phased:
+
+1. Now: one run = one isolated workspace with git snapshots (already true).
+2. Module identity separate from runs. A module is one git repo; a new developer run forks a
+   branch `dev/<user>/<run>` from main in its own worktree. Agents never write to main.
+3. Proposal flow. A finished branch is "proposed": the console shows diff, test results and a
+   live preview of the branch. Main only advances through a merge that passes tests and an
+   owner's approval. Viewers run released tags only.
+4. Conflicts. The SINDy layout (engine, one file per tab, one fragment per page) keeps most
+   developers in different files. Every revision stores its request text, diff and commit, so
+   when two branches touch the same file a merge agent receives both intents (not only the
+   diffs), resolves, re-runs tests, and a human approves. Rebase on main before each build.
+5. Advisory soft locks ("Alice is editing the Train tab") shown in the console; no hard locks.
+6. Per-developer cost budgets, since each developer's agents bill separately.
+
+Open questions for the professor: who approves merges, whether a module has a single owner,
+and how many developers realistically work on one module at once (small numbers mean plain
+git is enough; no real-time co-editing).
+
+Implemented first step (Nov 2026): projects, one shared module workspace per project, feature runs
+with a full plan loop, one writer per project at a time. Not yet: per-developer branches, merge
+approval, and detection that a feature plan is stale because another run changed the module after
+the plan was made (today the build simply runs on the current files).
+
+## Live module preview
+
+Run the platform as supervisor of module processes. A `PreviewManager` starts the module (its
+Flask shell and Bokeh server, as `run.sh` does) as a subprocess bound to 127.0.0.1 on a free
+port, health-checks it, streams its log to the console, and stops it when idle. Locally the
+console embeds it in an iframe with Bokeh `--allow-websocket-origin`; when deployed a reverse
+proxy maps `/preview/<run>/` to the port so one origin serves both. Generated code never runs
+inside the platform process. Dependencies come from one pinned shared environment at first,
+per-module environments later.
+
 ## Agent execution
 
 Builder and QA currently produce plans only. Tools, workspace command runner,
 tests and preview are future slices (see architecture.md).
+
+## Developer console layout after an MVP exists
+
+Direction from the product owner; not built. Today the console is a workflow viewer
+(chat, stage tracker, agent graph). Agent activity already lives inside the chat feed.
+
+Target layout once a module has been built and compiled:
+
+- **Center:** the live module preview, running in an isolated sandbox and embedded in
+  an iframe with the `sandbox` attribute on its own origin (no shared cookies). Reload
+  and desktop/tablet width toggles. Bokeh server starts on demand and stops when idle.
+- **Left:** the chat, collapsible and expandable. Agent activity stays inline.
+- **Build status strip:** evidence-based chips (compiled, tests passed of total, Flask and
+  Bokeh up, WebSocket ok, repair cycles used). The preview unlocks only after the health
+  check passes; on failure show the log tail instead of a blank frame.
+- **Acceptance criteria board:** one row per criterion from the project plan with status
+  `passed`, `failed`, `blocked` or `not_run`, the owner of any defect, and a link to the
+  evidence. A criterion without evidence is never shown as passed.
+- **Secondary tabs:** Files (tree and diff), Tests, Logs, Timeline, Cost (token usage per
+  agent, already recorded in events).
+- **Actions:** report an issue from the preview (selection, note and screenshot become a
+  defect routed to the Builder or Researcher), send a failed criterion to the Builder,
+  and one primary action, approve and release, enabled only when every mandatory
+  criterion has passed.
+- **Versions:** each run is a branch; choose between versions (v1, repair 1, ...) and
+  compare diffs. Release creates a versioned module for viewers.
+- **Mobile:** regions become tabs.
+
+Open questions for the product owner: does release publish to the parent site
+automatically or after a manual review; should the teacher edit the HTML description
+fragments in the console (a Description tab); who may approve and release.
+
+Implementation order: (1) status strip and iframe preview with logs, (2) criteria board,
+(3) files and diff, (4) report an issue from the preview.

@@ -13,11 +13,15 @@ from flask import Flask, Response, jsonify, render_template, request, stream_wit
 
 from .agents import AgentCatalog
 from .orchestrator import Orchestrator
-from .store import JsonRunStore, RunNotFound
-from .workspaces import WorkspaceManager
+from .store import JsonProjectStore, JsonRunStore, ProjectNotFound, RunNotFound
+from .workspaces import WorkspaceManager, module_files as list_module_files
 from .domain import RunStatus
 from .providers import OpenAIProvider, ReplayProvider
 from .workflow import PlanningWorkflow
+from .skills import SkillLibrary
+from . import artifacts as checks
+from .artifacts import ArtifactSchemas
+from .build import ModuleBuilder
 
 
 def create_app(project_root: Path | None = None, data_root: Path | None = None, providers: dict | None = None, stream_poll: float = 0.25) -> Flask:
@@ -29,6 +33,7 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
         JsonRunStore(data / "runs"),
         AgentCatalog.load(root / "config" / "agents"),
         WorkspaceManager(data / "workspaces"),
+        JsonProjectStore(data / "projects"),
     )
     if providers is None:
         providers = {"replay": ReplayProvider(root / "config" / "replay" / "demo.json", delay=float(os.environ.get("REPLAY_DELAY", "1.2")))}
@@ -37,7 +42,11 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
     default_provider = os.environ.get("MODULE_FOUNDRY_PROVIDER") or ("openai" if "openai" in providers else "replay")
     if default_provider not in providers:
         default_provider = next(iter(providers))
-    workflow = PlanningWorkflow(orchestrator, providers, default_provider)
+    skills = SkillLibrary(root / "config" / "skills")
+    skills.validate(orchestrator.agents)
+    schemas = ArtifactSchemas.load(root / "config" / "schemas")
+    workflow = PlanningWorkflow(orchestrator, providers, default_provider, skills, schemas)
+    builder = ModuleBuilder(workflow)
     app = Flask(__name__, template_folder=str(root / "apps" / "web" / "templates"), static_folder=str(root / "apps" / "web" / "static"))
 
     @app.get("/")
@@ -58,6 +67,10 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
     @app.errorhandler(RunNotFound)
     def missing(_exception):
         return error("run_not_found", "run was not found", 404)
+
+    @app.errorhandler(ProjectNotFound)
+    def missing_project(_exception):
+        return error("project_not_found", "project was not found", 404)
 
     @app.errorhandler(ValueError)
     def invalid(exception):
@@ -81,8 +94,38 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
         provider = payload.get("provider") or default_provider
         if provider not in providers:
             raise ValueError(f"provider is not available: {provider}")
-        run = orchestrator.create_run(str(payload.get("goal", "")), str(payload.get("created_by", "local-user")), provider)
+        run = orchestrator.create_run(str(payload.get("goal", "")), str(payload.get("created_by", "local-user")), provider,
+                                      payload.get("project_id") or None)
         return jsonify(run.to_dict()), 201
+
+    def run_summary(run):
+        return {"id": run.id, "goal": run.goal, "kind": run.kind, "status": run.status.value, "stage": run.stage.value,
+                "created_at": run.created_at, "updated_at": run.updated_at,
+                "built": any(e.type == "build.completed" for e in run.events)}
+
+    def project_summary(project):
+        runs = [r for r in orchestrator.store.list() if r.project_id == project.id]
+        built = sum(any(e.type == "build.completed" for e in r.events) for r in runs)
+        return {**project.to_dict(), "runs": [run_summary(r) for r in runs], "run_count": len(runs),
+                "versions": built, "files": len(list_module_files(orchestrator.workspaces.project_module(project.id)))}
+
+    @app.get("/api/v1/projects")
+    def list_projects():
+        return jsonify(items=[project_summary(p) for p in orchestrator.projects.list()])
+
+    @app.post("/api/v1/projects")
+    def create_project():
+        payload = json_object()
+        project = orchestrator.projects.create(str(payload.get("name", "")), str(payload.get("created_by", "local-user")))
+        return jsonify(project_summary(project)), 201
+
+    @app.get("/api/v1/projects/<project_id>")
+    def get_project(project_id: str):
+        return jsonify(project_summary(orchestrator.projects.get(project_id)))
+
+    @app.delete("/api/v1/projects/<project_id>")
+    def delete_project(project_id: str):
+        return jsonify(deleted=True, runs_removed=orchestrator.delete_project(project_id))
 
     @app.get("/api/v1/runs")
     def list_runs():
@@ -101,8 +144,28 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
     @app.post("/api/v1/runs/<run_id>/chat")
     def chat(run_id: str):
         payload = json_object()
-        run = workflow.submit(run_id, str(payload.get("content", "")))
+        content = str(payload.get("content", ""))
+        current = orchestrator.store.get(run_id)
+        run = builder.revise(run_id, content) if builder.has_build(current) else workflow.submit(run_id, content)
         return jsonify(run.to_dict()), 202
+
+    @app.post("/api/v1/runs/<run_id>/approve")
+    def approve(run_id: str):
+        return jsonify(builder.approve(run_id).to_dict()), 202
+
+    @app.get("/api/v1/runs/<run_id>/files")
+    def module_files(run_id: str):
+        return jsonify(items=builder.list_files(orchestrator.store.get(run_id)))
+
+    @app.get("/api/v1/runs/<run_id>/files/<path:file_path>")
+    def module_file(run_id: str, file_path: str):
+        run = orchestrator.store.get(run_id)
+        if not checks.safe_relative_path(file_path):
+            raise ValueError("invalid file path")
+        target = builder.module_dir(run) / file_path
+        if not target.is_file():
+            return error("file_not_found", "file was not found", 404)
+        return Response(target.read_text(encoding="utf-8", errors="replace"), mimetype="text/plain")
 
     @app.get("/api/v1/runs/<run_id>/events")
     def events(run_id: str):
@@ -116,6 +179,10 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
         return jsonify(items=[event.__dict__ if hasattr(event, "__dict__") else {
             "sequence": event.sequence, "type": event.type, "created_at": event.created_at, "data": event.data
         } for event in run.events if event.sequence > after])
+
+    @app.get("/api/v1/runs/<run_id>/artifacts")
+    def run_artifacts(run_id: str):
+        return jsonify(workflow.artifacts(orchestrator.store.get(run_id)))
 
     @app.get("/api/v1/runs/<run_id>/events/stream")
     def event_stream(run_id: str):

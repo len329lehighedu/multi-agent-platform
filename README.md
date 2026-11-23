@@ -13,7 +13,7 @@ The current foundation provides:
 - isolated per-run workspace directories;
 - explicit, validated workflow transitions;
 
-The developer console at `/` shows the orchestrator handing work to the Planner, Architect, Builder and QA agents, with a live graph, stage tracker and event timeline. This slice produces a plan only: no agent writes code or runs tools yet. The Planner may pause the run to ask you one question; your answer resumes it.
+The developer console at `/` shows the orchestrator handing work to the Planner, Architect, Builder and QA agents, with a live graph, stage tracker and event timeline. The Project Manager, Researcher, Builder and Tester each return a validated artifact, and the Project Manager ends with one consolidated plan: what the module does, the algorithm, how success is defined, and what you can do with the MVP. This slice produces a plan only; no agent writes code or runs tools yet. The Project Manager may pause the run to ask you one question. See [docs/process.md](docs/process.md).
 
 ## Architecture
 
@@ -71,8 +71,9 @@ PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
 
 ```text
 apps/web/                 developer console (workflow viewer)
-config/agents/            versioned agent definitions
-config/skills/            reusable domain procedures
+config/agents/            role prompts + manifest (skills, model tier)
+config/skills/            16 role-owned skills, loaded by the orchestrator
+config/schemas/           artifact schemas (task_spec, research_brief, ...)
 config/replay/            recorded agent responses for offline demos
 docs/                     product, architecture, and API decisions
 src/module_platform/      API-independent orchestration core + Flask adapter

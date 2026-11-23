@@ -8,11 +8,19 @@ from pathlib import Path
 
 
 @dataclass(frozen=True, slots=True)
+class Reference:
+    path: str
+    when_tag: str  # "*" means always
+
+
+@dataclass(frozen=True, slots=True)
 class AgentDefinition:
     id: str
     display_name: str
     prompt_path: Path
     skills: tuple[str, ...]
+    tier: str = "strong"
+    references: tuple[Reference, ...] = ()
 
     @property
     def prompt(self) -> str:
@@ -32,6 +40,8 @@ class AgentCatalog:
             definition = AgentDefinition(
                 id=item["id"], display_name=item["display_name"],
                 prompt_path=config_root / item["prompt"], skills=tuple(item.get("skills", [])),
+                tier=item.get("tier", "strong"),
+                references=tuple(Reference(r["path"], r.get("when_tag", "*")) for r in item.get("references", [])),
             )
             if definition.id in definitions:
                 raise ValueError(f"duplicate agent id: {definition.id}")

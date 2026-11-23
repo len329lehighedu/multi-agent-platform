@@ -13,6 +13,11 @@ class OpenAIProvider:
         self.model = model or os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
         self._client = client
 
+    def _model_for(self, tier: str | None) -> str:
+        """Per-tier models: OPENAI_MODEL_FAST / OPENAI_MODEL_STRONG, else the default."""
+        override = os.getenv(f"OPENAI_MODEL_{tier.upper()}") if tier else None
+        return override or self.model
+
     def _get_client(self):
         if self._client is None:
             from openai import OpenAI
@@ -26,7 +31,7 @@ class OpenAIProvider:
             options["text"] = {"format": {"type": "json_object"}}
         try:
             response = self._get_client().responses.create(
-                model=self.model,
+                model=self._model_for(request.metadata.get("tier")),
                 instructions=request.system_prompt,
                 input=list(request.messages),
                 **options,
@@ -51,5 +56,5 @@ class OpenAIProvider:
                 "input_tokens": getattr(usage, "input_tokens", None),
                 "output_tokens": getattr(usage, "output_tokens", None),
             },
-            provider_metadata={"provider": "openai", "model": self.model},
+            provider_metadata={"provider": "openai", "model": self._model_for(request.metadata.get("tier"))},
         )

@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "required": ["output_type", "method", "data_contract", "hyperparameters", "packages", "oracle", "compute_budget", "risks", "covers"],
+  "properties": {
+    "output_type": {"type": "string", "enum": ["predictor", "governing_equation", "parameter_inference", "classifier", "regressor", "optimizer"]},
+    "method": {"type": "object", "required": ["name", "family", "rationale", "rejected"], "properties": {
+      "name": {"type": "string", "minLength": 2},
+      "family": {"type": "string", "minLength": 2},
+      "rationale": {"type": "string", "minLength": 10},
+      "rejected": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "reason"], "properties": {"name": {"type": "string"}, "reason": {"type": "string", "minLength": 5}}}}}},
+    "data_contract": {"type": "object", "required": ["columns", "constraints", "split"], "properties": {
+      "columns": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "unit", "description"], "properties": {"name": {"type": "string"}, "unit": {"type": "string"}, "description": {"type": "string"}}}},
+      "constraints": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+      "split": {"type": "object", "required": ["strategy", "train_fraction", "leakage_guard"], "properties": {"strategy": {"type": "string"}, "train_fraction": {"type": "number"}, "leakage_guard": {"type": "string", "minLength": 10}}}}},
+    "hyperparameters": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "default", "range", "effect", "ui_control"], "properties": {
+      "name": {"type": "string"}, "default": {"type": ["string", "number", "boolean"]}, "range": {"type": "string"}, "effect": {"type": "string", "minLength": 5},
+      "ui_control": {"type": "string", "enum": ["slider", "select", "text", "none"]}}}},
+    "packages": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "version", "purpose", "license", "verified"], "properties": {
+      "name": {"type": "string"}, "version": {"type": "string"}, "purpose": {"type": "string"}, "license": {"type": "string"}, "verified": {"type": "boolean"}}}},
+    "oracle": {"type": "object", "required": ["description", "tolerance", "systems"], "properties": {
+      "description": {"type": "string", "minLength": 10}, "tolerance": {"type": "string"}, "systems": {"type": "array", "minItems": 1, "items": {"type": "string"}}}},
+    "compute_budget": {"type": "object", "required": ["train_seconds_max", "notes"], "properties": {"train_seconds_max": {"type": "number"}, "notes": {"type": "string"}}},
+    "risks": {"type": "array", "items": {"type": "string"}},
+    "covers": {"type": "array", "items": {"type": "string"}}
+  }
+}

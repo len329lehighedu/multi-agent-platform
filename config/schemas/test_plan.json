@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "required": ["cases", "oracle_checks", "not_runnable"],
+  "properties": {
+    "cases": {"type": "array", "minItems": 3, "items": {"type": "object", "required": ["id", "layer", "criterion_ids", "description", "edge_case"], "properties": {
+      "id": {"type": "string"},
+      "layer": {"type": "string", "enum": ["engine", "ui_contract", "smoke", "browser", "scientific"]},
+      "criterion_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+      "description": {"type": "string", "minLength": 10},
+      "edge_case": {"type": "boolean"}}}},
+    "oracle_checks": {"type": "array", "items": {"type": "object", "required": ["id", "description", "tolerance"], "properties": {"id": {"type": "string"}, "description": {"type": "string"}, "tolerance": {"type": "string"}}}},
+    "not_runnable": {"type": "array", "items": {"type": "string"}}
+  }
+}

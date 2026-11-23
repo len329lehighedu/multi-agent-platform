@@ -3,22 +3,38 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Module Foundry</title>
+  <title>STEM VISUALIZATION</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="logo">MF</span> Module Foundry <span class="tag">Developer console</span></div>
+    <div class="brand"><button id="home-link" class="brand-link" type="button" aria-label="Home"><img class="brand-logo" src="{{ url_for('static', filename='logo.jpg') }}" alt="STEM VISUALIZATIONS"></button><span id="crumb" class="tag">Developer console</span></div>
     <div class="controls">
-      <span id="run-pill" class="pill" hidden></span>
-      <label class="sr-only" for="provider">Model provider</label>
-      <select id="provider" title="Model provider"></select>
-      <button id="new-run" class="ghost" type="button">New run</button>
+      <button id="new-project" class="primary" type="button" hidden>New project</button>
+      <button id="new-run" class="ghost" type="button" hidden>New run</button>
     </div>
   </header>
 
-  <main class="layout">
+  <main id="home" class="home" hidden>
+    <div class="home-head">
+      <h1>Projects</h1>
+    </div>
+    <form id="project-form" class="project-form card" hidden>
+      <label for="project-name">Project name</label>
+      <input id="project-name" maxlength="80" placeholder="SINDy pendulum" autocomplete="off" required>
+      <button class="primary" type="submit">Create</button>
+      <button id="project-cancel" class="ghost" type="button">Cancel</button>
+      <span id="project-error" class="form-error" role="alert"></span>
+    </form>
+    <div id="project-list" class="project-list"></div>
+  </main>
+
+  <main id="console" class="layout" hidden>
     <section class="card chat" aria-label="Conversation">
+      <div class="chat-head">
+        <span class="head-left"><span id="project-name-label">Conversation</span><select id="run-select" hidden aria-label="Run in this project"></select></span>
+        <label class="toggle"><input type="checkbox" id="show-activity" checked> Show agent activity</label>
+      </div>
       <div id="messages" class="messages" aria-live="polite">
         <div class="empty">
           <h2>Describe a module to build</h2>
@@ -29,9 +45,13 @@
       <form id="composer" class="composer">
         <div id="hint" class="hint" hidden></div>
         <textarea id="prompt" rows="3" placeholder="e.g. A module that fits a SINDy model to pendulum data, tests it, and predicts" required></textarea>
+        <div id="mode-row" class="mode-row" hidden>
+          <label><input type="radio" name="mode" value="change" checked> Change this module</label>
+          <label><input type="radio" name="mode" value="feature"> New feature (plans first)</label>
+        </div>
         <div class="composer-row">
           <span id="status" class="status">Ready</span>
-          <button id="send" type="submit">Send</button>
+          <span class="actions"><button id="approve" class="approve" type="button" hidden>Approve plan &amp; build</button><button id="send" type="submit">Send</button></span>
         </div>
       </form>
     </section>
@@ -40,10 +60,6 @@
       <ol id="stages" class="stages" aria-label="Run stage"></ol>
       <div class="card graph-card">
         <svg id="graph" viewBox="0 0 680 440" role="img" aria-label="Agent workflow graph"></svg>
-      </div>
-      <div class="card timeline-card">
-        <h2>Run timeline</h2>
-        <ol id="timeline" class="timeline"><li class="muted">Events appear here as agents work.</li></ol>
       </div>
     </section>
   </main>

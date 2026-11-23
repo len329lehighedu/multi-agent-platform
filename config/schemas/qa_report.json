@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "required": ["results", "defects", "verdict"],
+  "properties": {
+    "results": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["case_id", "status", "evidence"], "properties": {
+      "case_id": {"type": "string"},
+      "status": {"type": "string", "enum": ["passed", "failed", "blocked", "not_run"]},
+      "evidence": {"type": "string", "minLength": 3}}}},
+    "defects": {"type": "array", "items": {"type": "object", "required": ["id", "severity", "owner", "expected", "actual"], "properties": {
+      "id": {"type": "string"}, "severity": {"type": "string", "enum": ["blocker", "major", "minor"]},
+      "owner": {"type": "string", "enum": ["builder", "researcher", "project_manager"]},
+      "expected": {"type": "string"}, "actual": {"type": "string"}}}},
+    "verdict": {"type": "string", "enum": ["ready_for_review", "needs_repair", "blocked"]}
+  }
+}

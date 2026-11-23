@@ -1,35 +1,67 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "agents": [
     {
-      "id": "orchestrator",
-      "display_name": "Orchestrator",
-      "prompt": "orchestrator.md",
-      "skills": []
+      "id": "project_manager",
+      "display_name": "Project Manager",
+      "prompt": "project-manager.md",
+      "tier": "fast",
+      "skills": [
+        "intake-and-scoping",
+        "plan-synthesis",
+        "stage-gating-and-handoff",
+        "cost-and-budget"
+      ],
+      "references": []
     },
     {
-      "id": "learning_planner",
-      "display_name": "Learning Planner",
-      "prompt": "stem-learning-planner.md",
-      "skills": ["stem-lesson-design", "stem-module-examples"]
-    },
-    {
-      "id": "scientific_architect",
-      "display_name": "Scientific Architect",
-      "prompt": "stem-architect.md",
-      "skills": ["stem-scientific-python", "stem-flask-bokeh"]
+      "id": "researcher",
+      "display_name": "Researcher",
+      "prompt": "researcher.md",
+      "tier": "strong",
+      "skills": [
+        "model-selection",
+        "data-contract",
+        "hyperparameter-spec",
+        "package-selection",
+        "scientific-oracle"
+      ],
+      "references": [
+        {
+          "path": "model-selection/references/equation-discovery.md",
+          "when_tag": "equation_discovery"
+        }
+      ]
     },
     {
       "id": "builder",
       "display_name": "Module Builder",
-      "prompt": "stem-builder.md",
-      "skills": ["stem-learning-ui", "stem-bokeh-interaction", "stem-flask-bokeh"]
+      "prompt": "builder.md",
+      "tier": "strong",
+      "skills": [
+        "module-architecture",
+        "performance-optimization",
+        "bokeh-ui-design",
+        "code-conventions"
+      ],
+      "references": [
+        {
+          "path": "module-architecture/references/reference-layout.md",
+          "when_tag": "*"
+        }
+      ]
     },
     {
-      "id": "qa_reviewer",
-      "display_name": "QA Reviewer",
-      "prompt": "stem-qa-reviewer.md",
-      "skills": ["stem-module-verification"]
+      "id": "tester",
+      "display_name": "Tester",
+      "prompt": "tester.md",
+      "tier": "strong",
+      "skills": [
+        "test-design",
+        "scientific-verification",
+        "qa-reporting"
+      ],
+      "references": []
     }
   ]
 }

@@ -38,7 +38,7 @@ ALLOWED_STAGE_TRANSITIONS: dict[RunStage, set[RunStage]] = {
     RunStage.BUILDING: {RunStage.QA, RunStage.ARCHITECTURE},
     RunStage.QA: {RunStage.REPAIR, RunStage.REVIEW},
     RunStage.REPAIR: {RunStage.QA, RunStage.ARCHITECTURE},
-    RunStage.REVIEW: {RunStage.REPAIR},
+    RunStage.REVIEW: {RunStage.REPAIR, RunStage.BUILDING},
 }
 
 
@@ -65,6 +65,24 @@ class RunEvent:
 
 
 @dataclass(slots=True)
+class Project:
+    """A named container for one module. Its runs (the first build, then each feature) share one module workspace."""
+    id: str
+    name: str
+    created_by: str
+    created_at: str
+    updated_at: str
+
+    @classmethod
+    def create(cls, name: str, created_by: str = "local-user") -> "Project":
+        now = utc_now()
+        return cls(uuid4().hex, name, created_by, now, now)
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass(slots=True)
 class RunRecord:
     id: str
     goal: str
@@ -77,6 +95,9 @@ class RunRecord:
     events: list[RunEvent] = field(default_factory=list)
     workspace_path: str | None = None
     revision: int = 0
+    project_id: str | None = None
+    kind: str = "module"  # "module" builds the first version of a project's module, "feature" extends it
+    module_path: str | None = None
 
     @classmethod
     def create(cls, goal: str, created_by: str = "local-user") -> "RunRecord":
