@@ -113,7 +113,7 @@ option { background: var(--panel-2); }
 .node.failed rect { stroke: var(--red); stroke-width: 2.5; }
 @keyframes pulse { 50% { stroke-opacity: .35; } }
 .node .name { font-size: 14px; font-weight: 700; fill: var(--ink); }
-.node .role { font: 11px var(--mono); fill: var(--muted); }
+.node .role { font: 10px var(--mono); fill: var(--muted); }
 .node .state { font: 600 11px var(--mono); fill: var(--muted); }
 .node .dot { fill: var(--idle); }
 .node.running .dot, .node.running .state { fill: var(--blue); }
@@ -150,8 +150,18 @@ option { background: var(--panel-2); }
 [hidden] { display: none !important; }
 
 @media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; height: auto; }
-  .chat { min-height: 520px; }
+  .layout { grid-template-columns: minmax(0, 1fr); height: auto; padding: 12px; gap: 12px; }
+  .chat, .side { min-width: 0; }
+  .chat { min-height: 520px; max-height: 80vh; }
+  .topbar { padding: 0 12px; }
+  .brand-logo { height: 38px; }
+  .tabs { flex-wrap: wrap; }
+  .stages { flex-wrap: wrap; }
+  .stages li { flex: 1 1 30%; font-size: 12px; padding: 6px 2px; }
+  .home { padding: 24px 16px; }
+  .home-head h1 { font-size: 26px; }
+  .project-card h2 { font-size: 20px; }
+  .project-card p { font-size: 16px; }
   .tag { display: none; }
   .project-list { grid-template-columns: 1fr; }
 }

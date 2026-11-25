@@ -38,8 +38,9 @@ The first call starts the planning workflow; if the run is `awaiting_user`, the
 content is the answer and the workflow resumes. Work runs in a background thread.
 A finished or already-working run returns 400. The workflow ends with a project plan for approval and builds nothing.
 
-`POST /runs` also accepts an optional `"provider"` (`openai` or `replay`);
-`GET /config` lists available providers and the default.
+`POST /runs` also accepts an optional `"provider"` (`claude`, `openai` or `replay`);
+`GET /config` lists available providers and the default. The default is `replay` unless
+`MODULE_FOUNDRY_PROVIDER` names another, so a paid provider is never used by accident.
 
 ## Projects
 
@@ -62,7 +63,33 @@ Builder (`revision.requested`). Before the plan is approved, chat returns 400.
 `GET /runs/{run_id}/files` lists the module files; `GET /runs/{run_id}/files/{path}` returns one as
 plain text. Events: `plan.approved`, `build.files_written`, `build.checks` (`passed`, `command`,
 `output`, `round`), `build.completed`, `build.failed`, `revision.requested`, `revision.completed`,
-`revision.failed`.
+`revision.failed`, `build.retried`. `build.checks` runs the module's unit tests and then loads
+`main.py` as a Bokeh app, so API misuse that unit tests cannot see fails the build.
+
+`POST /runs/{run_id}/retry` (no body, HTTP 202) runs the build again from the approved plan when it
+stopped while the Builder was writing (a provider error such as an output limit). It returns 400 in
+any other state. Event: `build.retried`.
+
+## Live preview
+
+The module is a Bokeh directory app whose entry file is `main.py`. The platform serves it with
+`bokeh serve` as a subprocess on `127.0.0.1` (generated code never runs inside the platform process).
+
+- `GET /projects/{id}/preview` returns `{"state", "url", "message", "log"}`; `state` is `running`,
+  `stopped`, `failed` or `no_entry` (no `main.py`). `log` is the tail of the module log on failure.
+- `POST /projects/{id}/preview` starts, or restarts so changed code is loaded, and waits until the
+  module answers. Starts of one project are serialized.
+- `DELETE /projects/{id}/preview` stops it. Deleting a project also stops its preview.
+
+At most three previews run at once; the oldest is stopped first, and all stop when the platform exits.
+
+## Spend
+
+`GET /spend` returns `{"spend": {"total_usd", "budget_usd", "calls", "by_model", "by_project",
+"module_budget_usd"}}`, or `{"spend": null}` when the Claude provider is not configured. Calls are
+priced from real token usage and persisted in `var/spend.json`. A call is refused with a
+`ProviderError` once the total reaches `CLAUDE_BUDGET_USD` (default 90) or one project reaches
+`CLAUDE_MODULE_BUDGET_USD` (default 1.00).
 
 ## Events
 

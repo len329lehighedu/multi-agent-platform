@@ -221,7 +221,7 @@ class PlanningWorkflow:
         attempts = 0
         while True:
             attempts += 1
-            request = ModelRequest(run_id, agent.id, system_prompt, tuple(messages), metadata={"json": True, "tier": agent.tier, "key": step.artifact})
+            request = ModelRequest(run_id, agent.id, system_prompt, tuple(messages), metadata={"json": True, "tier": agent.tier, "key": step.artifact, "project_id": run.project_id})
             response = self.providers[self._provider_id(run)].generate(request)
             _add_usage(usage, response.usage)
             reply = parse_agent_reply(response)

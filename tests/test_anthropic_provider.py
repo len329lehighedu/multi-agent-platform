@@ -77,6 +77,20 @@ class AnthropicProviderTests(unittest.TestCase):
         with self.assertRaises(ProviderError):
             again.generate(request("strong"))
 
+    def test_module_budget_stops_one_project_but_not_another(self):
+        usage = dict(input_tokens=500_000, output_tokens=0, cache_creation_input_tokens=0, cache_read_input_tokens=0)  # $1 on Sonnet
+        provider = AnthropicProvider(api_key="t", model="claude-sonnet-5-5", ledger_path=self.dir / "m.json", budget=50, module_budget=1.0, client=FakeClient(usage=usage))
+
+        def call(project):
+            return provider.generate(ModelRequest("r", "builder", "s", ({"role": "user", "content": "x"},), metadata={"json": True, "tier": "strong", "key": "k", "project_id": project}))
+
+        call("p1")
+        with self.assertRaises(ProviderError) as caught:
+            call("p1")
+        self.assertIn("Module budget", str(caught.exception))
+        call("p2")  # another project is unaffected
+        self.assertAlmostEqual(provider.ledger.snapshot()["by_project"]["p1"], 1.0, places=2)
+
     def test_truncated_and_empty_replies_are_errors(self):
         with self.assertRaises(ProviderError):
             self.provider(FakeClient(stop="max_tokens")).generate(request())

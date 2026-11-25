@@ -44,18 +44,28 @@ the plan was made (today the build simply runs on the current files).
 
 ## Live module preview
 
-Run the platform as supervisor of module processes. A `PreviewManager` starts the module (its
-Flask shell and Bokeh server, as `run.sh` does) as a subprocess bound to 127.0.0.1 on a free
-port, health-checks it, streams its log to the console, and stops it when idle. Locally the
-console embeds it in an iframe with Bokeh `--allow-websocket-origin`; when deployed a reverse
-proxy maps `/preview/<run>/` to the port so one origin serves both. Generated code never runs
-inside the platform process. Dependencies come from one pinned shared environment at first,
-per-module environments later.
+Implemented (Nov 2026): `PreviewManager` serves a project's module with `bokeh serve` as a subprocess
+on 127.0.0.1 and the console embeds it in an iframe (Module tab). See api-contract.md, Live preview.
+Still open: a reverse proxy mapping `/preview/<project>/` to the port when deployed, idle shutdown,
+per-module environments (today one shared interpreter), and a real sandbox for generated code (it
+currently runs with the platform user's permissions, so keep it on localhost until that exists).
+
+## Editing module files in the console (proposal)
+
+Feasible and small: an editor in the Files tab that saves through `PUT /runs/{id}/files/{path}`.
+The route reuses the Builder's safeguards (safe relative path, allowed suffix, size limit) and takes the
+project's single-writer claim, so it cannot overlap an agent run. A save writes the file, makes a git
+snapshot (author is the developer, so the change is attributable and revertable), runs the same
+checks as a build (unit tests and the Bokeh app load) and restarts the preview on success. A failed
+check keeps the file but shows the output and offers "revert to the previous snapshot". Agents see the
+edit automatically because their context is always read from disk. Open questions: whether a human
+edit that fails checks may stay saved, and a diff view before saving.
 
 ## Agent execution
 
-Builder and QA currently produce plans only. Tools, workspace command runner,
-tests and preview are future slices (see architecture.md).
+Builder and Tester run for real: files are written to the project workspace, tests and the Bokeh
+app load run in a subprocess, and the preview serves the result. Open: OS-level sandboxing,
+oracle and headless-browser checks so the Tester can show evidence for more than unit tests.
 
 ## Developer console layout after an MVP exists
 

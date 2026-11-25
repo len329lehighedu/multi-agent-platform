@@ -33,7 +33,7 @@ function buildGraph() {
   graph.replaceChildren();
   state.nodes = {};
   state.edges = {};
-  const hub = { x: 30, y: 186, w: 180, h: 68 };
+  const hub = { x: 20, y: 186, w: 224, h: 68 };
   const edgeLayer = svg('g', {}, graph);
   const nodeLayer = svg('g', {}, graph);
   const makeNode = (agent, box, badge) => {
@@ -52,7 +52,7 @@ function buildGraph() {
   };
   makeNode(HUB, hub);
   SPECIALISTS.forEach((agent, index) => {
-    const box = { x: 470, y: 40 + index * 146, w: 190, h: 68 };
+    const box = { x: 436, y: 40 + index * 146, w: 224, h: 68 };
     const cy = box.y + box.h / 2;
     const d = `M${hub.x + hub.w},${hub.y + hub.h / 2} C 340,${hub.y + hub.h / 2} 340,${cy} ${box.x},${cy}`;
     state.edges[agent.id] = svg('path', { class: 'edge', d }, edgeLayer);

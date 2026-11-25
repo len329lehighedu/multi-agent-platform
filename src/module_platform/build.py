@@ -301,7 +301,7 @@ class ModuleBuilder:
         started = time.monotonic()
         for attempt in (1, 2):
             response = self.w.providers[self.w._provider_id(run)].generate(
-                ModelRequest(run_id, "builder", system, tuple(msgs), metadata={"json": True, "tier": agent.tier, "key": f"file_set:{kind}"}))
+                ModelRequest(run_id, "builder", system, tuple(msgs), metadata={"json": True, "tier": agent.tier, "key": f"file_set:{kind}", "project_id": run.project_id}))
             _add_usage(usage, response.usage)
             reply = parse_agent_reply(response)
             errors = self._validate_file_set(reply["artifact"], design, existing)
@@ -378,7 +378,7 @@ class ModuleBuilder:
         started = time.monotonic()
         for attempt in (1, 2):
             response = self.w.providers[self.w._provider_id(run)].generate(
-                ModelRequest(run_id, "tester", system, tuple(msgs), metadata={"json": True, "tier": agent.tier, "key": "qa_report"}))
+                ModelRequest(run_id, "tester", system, tuple(msgs), metadata={"json": True, "tier": agent.tier, "key": "qa_report", "project_id": run.project_id}))
             _add_usage(usage, response.usage)
             reply = parse_agent_reply(response)
             artifact = reply["artifact"]

@@ -5,8 +5,9 @@ Models by tier: the agent manifest marks each agent "fast" or "strong".
   strong -> CLAUDE_MODEL_STRONG, else CLAUDE_MODEL (default claude-sonnet-5-5)
 
 Every call is priced from its real usage and added to a persistent ledger. Calls stop with a
-clear error once the ledger reaches the budget (CLAUDE_BUDGET_USD, default 90), so a runaway
-loop cannot overspend the agreed API credit.
+clear error once the ledger reaches the total budget (CLAUDE_BUDGET_USD, default 90) or one
+project reaches its module budget (CLAUDE_MODULE_BUDGET_USD, default 1.00), so a runaway loop
+cannot overspend the agreed API credit.
 """
 
 from __future__ import annotations
@@ -49,8 +50,9 @@ def cost_usd(model: str, usage: dict) -> float:
 class SpendLedger:
     """Running total of API spend, persisted so a restart does not reset the budget."""
 
-    def __init__(self, path: Path | None, budget: float):
-        self.path, self.budget = path, budget
+    def __init__(self, path: Path | None, budget: float, module_budget: float | None = None):
+        self.path, self.budget, self.module_budget = path, budget, module_budget
+        self.by_project: dict[str, float] = {}
         self._lock = Lock()
         self.total = 0.0
         self.calls = 0
@@ -61,17 +63,23 @@ class SpendLedger:
                 self.total = float(saved.get("total_usd", 0))
                 self.calls = int(saved.get("calls", 0))
                 self.by_model = dict(saved.get("by_model", {}))
+                self.by_project = dict(saved.get("by_project", {}))
             except (OSError, ValueError):
                 pass
 
-    def check(self) -> None:
+    def check(self, project_id: str | None = None) -> None:
         with self._lock:
             if self.total >= self.budget:
                 raise ProviderError(f"API budget reached: ${self.total:.2f} spent of ${self.budget:.2f}. Raise CLAUDE_BUDGET_USD to continue.")
+            spent = self.by_project.get(project_id, 0.0) if project_id else 0.0
+            if self.module_budget is not None and spent >= self.module_budget:
+                raise ProviderError(f"Module budget reached: ${spent:.2f} spent of ${self.module_budget:.2f} on this project. Raise CLAUDE_MODULE_BUDGET_USD to continue.")
 
-    def add(self, model: str, amount: float) -> float:
+    def add(self, model: str, amount: float, project_id: str | None = None) -> float:
         with self._lock:
             self.total += amount
+            if project_id:
+                self.by_project[project_id] = round(self.by_project.get(project_id, 0.0) + amount, 6)
             self.calls += 1
             self.by_model[model] = round(self.by_model.get(model, 0.0) + amount, 6)
             if self.path:
@@ -80,7 +88,8 @@ class SpendLedger:
             return self.total
 
     def snapshot_unlocked(self) -> dict:
-        return {"total_usd": round(self.total, 6), "budget_usd": self.budget, "calls": self.calls, "by_model": self.by_model}
+        return {"total_usd": round(self.total, 6), "budget_usd": self.budget, "calls": self.calls, "by_model": self.by_model,
+                "module_budget_usd": self.module_budget, "by_project": self.by_project}
 
     def snapshot(self) -> dict:
         with self._lock:
@@ -89,13 +98,14 @@ class SpendLedger:
 
 class AnthropicProvider:
     def __init__(self, api_key: str | None = None, model: str | None = None, ledger_path: Path | None = None,
-                 budget: float | None = None, client=None, debug_dir: Path | None = None):
+                 budget: float | None = None, client=None, debug_dir: Path | None = None, module_budget: float | None = None):
         self._api_key = api_key or os.getenv("CLAUDE_API_KEY")
         self.model = model or os.getenv("CLAUDE_MODEL") or DEFAULTS["strong"]
         self._client = client
         self.debug_dir = Path(debug_dir) if debug_dir else None
         limit = budget if budget is not None else float(os.getenv("CLAUDE_BUDGET_USD", "90"))
-        self.ledger = SpendLedger(ledger_path, limit)
+        per_module = module_budget if module_budget is not None else float(os.getenv("CLAUDE_MODULE_BUDGET_USD", "1.00"))
+        self.ledger = SpendLedger(ledger_path, limit, per_module)
 
     def _model_for(self, tier: str | None) -> str:
         tier = tier if tier in DEFAULTS else "strong"
@@ -116,7 +126,8 @@ class AnthropicProvider:
         return self._client
 
     def generate(self, request: ModelRequest) -> ModelResponse:
-        self.ledger.check()
+        project_id = request.metadata.get("project_id")
+        self.ledger.check(project_id)
         tier = request.metadata.get("tier")
         tier = tier if tier in DEFAULTS else "strong"
         model = self._model_for(tier)
@@ -147,7 +158,7 @@ class AnthropicProvider:
             "cache_read_input_tokens": getattr(usage, "cache_read_input_tokens", 0) or 0,
         }
         spent = cost_usd(model, counts)
-        total = self.ledger.add(model, spent)
+        total = self.ledger.add(model, spent, project_id)
         if getattr(message, "stop_reason", None) == "refusal":
             raise ProviderError("Claude declined this request")
         text = "".join(block.text for block in message.content if getattr(block, "type", "") == "text").strip()

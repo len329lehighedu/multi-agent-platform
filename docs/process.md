@@ -106,5 +106,22 @@ Skills live in `config/skills/<name>/SKILL.md`, are owned by one role, and are
 loaded by the orchestrator, not requested by the agent. Reference material loads
 only when a task tag requires it. Run
 `PYTHONPATH=src .venv/bin/python -m module_platform.skills` to see prompt sizes.
-Agents have a model tier (`fast` or `strong`); set `OPENAI_MODEL_FAST` and
-`OPENAI_MODEL_STRONG` to use different models per tier.
+Agents have a model tier (`fast` or `strong`) in `config/agents/manifest.json`. With Claude, `fast`
+is `CLAUDE_MODEL_FAST` (default Haiku) and `strong` is `CLAUDE_MODEL` (Sonnet); today the Project
+Manager is `strong` and the Researcher, Builder and Tester are `fast`. With OpenAI use
+`OPENAI_MODEL_FAST` and `OPENAI_MODEL_STRONG`.
+
+Every Claude call is priced from its real usage and added to `var/spend.json`; the total budget and
+the per-module budget stop further calls with a readable error (see api-contract.md, Spend).
+Measured on the first live runs: a small module with a cross-validation feature cost about $0.15.
+
+## Generated module contract
+
+- The entry file is `main.py`, a Bokeh directory app; the platform previews it with `bokeh serve`.
+- Tests use `unittest`. After they pass, the platform loads `main.py` as a Bokeh app; a callback
+  with the wrong signature or a removed Bokeh class fails the build and goes to the repair loop.
+- The Builder must not loosen a test to make it pass. A criterion that cannot be reached is
+  reported in `notes` so a human decides.
+- A build that stops while the Builder is writing can be retried from the approved plan
+  (`POST /runs/{id}/retry`) without planning again. A build that wrote files but failed its tests
+  is kept, and the developer sends a change request.

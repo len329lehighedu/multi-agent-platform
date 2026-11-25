@@ -48,8 +48,13 @@ PYTHONPATH=src .venv/bin/python -m module_platform
 
 The API listens on `http://127.0.0.1:8080` by default. Open it to use the console.
 
-Providers (choose in the console header or per run via the API):
+Providers (the server picks one with `MODULE_FOUNDRY_PROVIDER`; the default is `replay`):
 
+- `claude` — live calls; needs `CLAUDE_API_KEY` and `CLAUDE_MODEL` (the strong model, for example
+  `claude-sonnet-5-5`) in the ignored `.env`. Optional: `CLAUDE_MODEL_FAST` (default
+  `claude-haiku-5-5`), `CLAUDE_MODEL_STRONG`, `CLAUDE_BUDGET_USD` (total stop, default 90),
+  `CLAUDE_MODULE_BUDGET_USD` (per project, default 1.00), `CLAUDE_THINKING_FAST=on` (thinking is
+  off for fast models), `CLAUDE_EFFORT_FAST` / `CLAUDE_EFFORT_STRONG`. Spend is at `/api/v1/spend`.
 - `openai` — live calls; needs `OPENAI_API_KEY` (and optional `OPENAI_MODEL`) in the ignored `.env`.
 - `replay` — a recorded run from `config/replay/demo.json`; works offline, useful as a demo fallback. Set `REPLAY_DELAY` (seconds, default 1.2) to pace it.
 
