@@ -41,6 +41,19 @@ Report one result per test_plan case. Mark a case passed only when the test outp
 """
 
 
+APP_LOAD_CHECK = """
+import sys
+from bokeh.application import Application
+from bokeh.application.handlers.directory import DirectoryHandler
+handler = DirectoryHandler(filename=sys.argv[1])
+Application(handler).create_document()
+if handler.failed:
+    print("The module's main.py failed to load as a Bokeh app: " + str(handler.error))
+    print((handler.error_detail or "")[-1500:])
+    sys.exit(1)
+"""
+
+
 class ModuleBuilder:
     def __init__(self, workflow: PlanningWorkflow):
         self.w = workflow
@@ -67,6 +80,32 @@ class ModuleBuilder:
             self._claim_project(run)
             claimed = True
             run.append_event("plan.approved", {"by": run.created_by})
+            run.status = RunStatus.ACTIVE
+            self.store.save(run)
+            Thread(target=self._guarded, args=(run_id, self._build, None), daemon=True).start()
+        except Exception:
+            self.w.release(run_id)
+            if claimed:
+                self._release_project(run.project_id)
+            raise
+        return run
+
+    def can_retry(self, run: RunRecord) -> bool:
+        """A build that stopped while the Builder was writing (a provider error) can be run again from the approved plan."""
+        types = [e.type for e in run.events]
+        return (run.status == RunStatus.FAILED and "plan.approved" in types and run.stage == RunStage.BUILDING
+                and "build.completed" not in types and "build.failed" not in types)
+
+    def retry(self, run_id: str) -> RunRecord:
+        self.w.claim(run_id)
+        claimed = False
+        try:
+            run = self.store.get(run_id)
+            if not self.can_retry(run):
+                raise ValueError("only a build that stopped while the Builder was writing can be retried")
+            self._claim_project(run)
+            claimed = True
+            run.append_event("build.retried", {"by": run.created_by})
             run.status = RunStatus.ACTIVE
             self.store.save(run)
             Thread(target=self._guarded, args=(run_id, self._build, None), daemon=True).start()
@@ -214,6 +253,10 @@ class ModuleBuilder:
         known = self.w.artifacts(run)
         module = self.module_dir(run)
         backup = self._backup(run)
+        if run.stage == RunStage.REPAIR:  # runs saved before failed builds were parked in review
+            self._stage(run_id, RunStage.QA, "settling before the change")
+        if self.store.get(run_id).stage == RunStage.QA:
+            self._stage(run_id, RunStage.REVIEW, "settling before the change")
         self._stage(run_id, RunStage.BUILDING, f"revision {number}")
         self._handoff(run_id, "builder", f"Revision {number}: {request[:160]}")
         existing = {f["path"] for f in self.list_files(run)}
@@ -365,6 +408,12 @@ class ModuleBuilder:
     def _finish_failed(self, run_id: str, text: str, rolled_back: bool = False) -> None:
         run = self.store.get(run_id)
         run.append_message(Message.create("agent", text, agent_id=MANAGER))
+        if not rolled_back:
+            # The kept module is now in the developer's hands: park the run in review so a change request can start from there.
+            if run.stage == RunStage.REPAIR:
+                run.transition(RunStage.QA, "build stopped after repair attempts")
+            if run.stage == RunStage.QA:
+                run.transition(RunStage.REVIEW, "build failed its tests; module kept for changes")
         run.status = RunStatus.NEEDS_REVIEW
         run.append_event("build.failed", {"reason": text, "rolled_back": rolled_back})
         self.store.save(run)
@@ -423,6 +472,12 @@ class ModuleBuilder:
         try:
             done = subprocess.run(command, cwd=module, env=env, capture_output=True, text=True, timeout=CHECK_TIMEOUT)
             output, passed = (done.stdout + done.stderr), done.returncode == 0
+            if passed and (module / "main.py").is_file():
+                # Unit tests cannot see Bokeh's own checks (callback signatures, bad properties): load the app the way `bokeh serve` does.
+                loaded = subprocess.run([sys.executable, "-c", APP_LOAD_CHECK, str(module)], cwd=module, env=env, capture_output=True, text=True, timeout=CHECK_TIMEOUT)
+                if loaded.returncode != 0:
+                    output, passed = (output + "\n" + loaded.stdout + loaded.stderr), False
+                    shown += " + load main.py as a Bokeh app"
         except subprocess.TimeoutExpired:
             output, passed = f"tests timed out after {CHECK_TIMEOUT}s", False
         return {"passed": passed, "command": shown, "output": output.strip()[-OUTPUT_TAIL:], "duration_ms": int((time.monotonic() - started) * 1000)}

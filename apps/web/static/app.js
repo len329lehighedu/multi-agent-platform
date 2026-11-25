@@ -11,7 +11,7 @@ const SPECIALISTS = [
 const NAMES = { [HUB.id]: HUB.name, ...Object.fromEntries(SPECIALISTS.map((a) => [a.id, a.name])) };
 const LABELS = { idle: 'Idle', running: 'Working', waiting: 'Needs you', done: 'Done', failed: 'Failed' };
 
-const state = { projectId: null, project: null, runId: null, cursor: 0, phase: 'idle', source: null, shown: new Set(), queue: Promise.resolve(), nodes: {}, edges: {} };
+const state = { tab: 'agents', chatOpen: true, projectId: null, project: null, runId: null, cursor: 0, phase: 'idle', source: null, shown: new Set(), queue: Promise.resolve(), nodes: {}, edges: {} };
 
 function svg(tag, attrs = {}, parent) {
   const node = document.createElementNS(SVG, tag);
@@ -138,6 +138,8 @@ function setPhase(phase, hint = '') {
   $('#prompt').disabled = locked;
   $('#send').disabled = locked;
   $('#approve').hidden = phase !== 'plan';
+  if (phase !== 'failed') state.canRetry = false;
+  $('#retry').hidden = !(phase === 'failed' && state.canRetry);
   if (phase === 'built' && $('#mode-row').hidden) document.querySelector('input[name=mode][value=change]').checked = true;
   $('#mode-row').hidden = phase !== 'built';
   const text = {
@@ -151,8 +153,118 @@ function setPhase(phase, hint = '') {
   $('#status').textContent = text[phase];
   $('#hint').hidden = !hint;
   $('#hint').textContent = hint;
+  if (phase === 'waiting' || phase === 'plan') setChat(true);
+  updateRail();
+  $('#module-busy').hidden = !(phase === 'running' && state.project?.versions);
   $('#prompt').placeholder = phase === 'waiting' ? 'Type your answer…' : phase === 'built' ? 'Describe a change (layout, labels, colours…) or a new feature' : 'e.g. A module that fits a SINDy model to pendulum data, tests it, and predicts';
   if (phase === 'waiting') $('#prompt').focus();
+}
+
+/* ---------- workspace: tabs, live module, files, collapsible chat ---------- */
+const TABS = ['module', 'agents', 'files'];
+
+function showTab(name) {
+  state.tab = name;
+  TABS.forEach((tab) => {
+    $(`#panel-${tab}`).hidden = tab !== name;
+    $(`#tab-${tab}`).setAttribute('aria-selected', String(tab === name));
+  });
+  $('#preview-reload').hidden = name !== 'module';
+  if (name === 'files') loadFiles();
+  if (name === 'module') ensurePreview(false);
+}
+
+function setChat(open) {
+  state.chatOpen = open;
+  $('#console').classList.toggle('chat-closed', !open);
+  $('#chat-rail').hidden = open;
+  $('#chat-rail').setAttribute('aria-expanded', String(open));
+  updateRail();
+}
+
+// A collapsed chat must never hide a gate: show a dot whenever the agents wait for the developer.
+function updateRail() {
+  $('#rail-dot').hidden = state.chatOpen || !['waiting', 'plan', 'failed'].includes(state.phase);
+}
+
+function previewNote(text) {
+  $('#module-note').textContent = text;
+}
+
+let previewCall = null;
+function ensurePreview(restart) {
+  // One call at a time; a plain refresh joins the call already in flight, a restart waits for it.
+  if (previewCall && !restart) return previewCall;
+  const run = () => doEnsurePreview(restart);
+  const next = previewCall ? previewCall.then(run, run) : run();
+  const tracked = next.finally(() => { if (previewCall === tracked) previewCall = null; });
+  previewCall = tracked;
+  return tracked;
+}
+
+async function doEnsurePreview(restart) {
+  if (!state.projectId || !(state.project?.versions || state.project?.files)) {
+    $('#module-frame').removeAttribute('src');
+    previewNote('No module yet. Describe one in the chat and approve the plan; it appears here once it is built and tested.');
+    $('#preview-state').textContent = '';
+    return;
+  }
+  const projectId = state.projectId;
+  const base = `/api/v1/projects/${projectId}/preview`;
+  try {
+    let info = restart ? null : await api(base);
+    if (!info || info.state !== 'running') {
+      $('#preview-state').textContent = 'starting…';
+      previewNote('Starting the module…');
+      info = await api(base, { method: 'POST' });
+    }
+    if (projectId !== state.projectId) return;
+    if (info.state === 'running') {
+      $('#preview-state').textContent = 'running';
+      previewNote('');
+      if ($('#module-frame').getAttribute('src') !== info.url || restart) $('#module-frame').src = info.url;
+    } else {
+      $('#module-frame').removeAttribute('src');
+      $('#preview-state').textContent = info.state === 'no_entry' ? 'no main.py' : 'not running';
+      previewNote(info.state === 'no_entry'
+        ? 'This module has no main.py, so it cannot be previewed yet. Ask the Builder to add a Bokeh entry file.'
+        : `The module did not start: ${info.message}\n\n${info.log || ''}`);
+    }
+  } catch (error) {
+    previewNote(error.message);
+  }
+}
+
+async function loadFiles() {
+  const runId = state.runId || state.project?.runs?.[0]?.id;
+  const list = $('#file-list');
+  list.replaceChildren();
+  $('#file-view').textContent = 'Select a file.';
+  if (!runId || !(state.project?.versions || state.project?.files)) {
+    $('#file-view').textContent = 'No files yet.';
+    return;
+  }
+  try {
+    const { items } = await api(`/api/v1/runs/${runId}/files`);
+    items.forEach((file) => {
+      const row = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = file.path;
+      button.addEventListener('click', async () => {
+        list.querySelectorAll('button').forEach((b) => b.removeAttribute('aria-current'));
+        button.setAttribute('aria-current', 'true');
+        try {
+          const response = await fetch(`/api/v1/runs/${runId}/files/${file.path}`);
+          $('#file-view').textContent = response.ok ? await response.text() : 'Could not read this file.';
+        } catch (error) { $('#file-view').textContent = error.message; }
+      });
+      row.append(button);
+      list.append(row);
+    });
+  } catch (error) {
+    $('#file-view').textContent = error.message;
+  }
 }
 
 /* ---------- event handling ---------- */
@@ -196,7 +308,13 @@ function handle(event) {
     case 'plan.ready':
       addTimeline('Project plan ready for approval', 'green', 'Nothing has been built or run.');
       break;
+    case 'build.retried':
+      state.canRetry = false;
+      setPhase('running');
+      addTimeline('Build retried', 'blue', 'The approved plan is used again.');
+      break;
     case 'plan.approved':
+      state.approved = true;
       setPhase('running');
       addTimeline('You approved the plan', 'blue', 'The Builder starts writing the module.');
       break;
@@ -208,12 +326,14 @@ function handle(event) {
         data.passed ? 'green' : 'red', data.passed ? `${data.command} · ${(data.duration_ms / 1000).toFixed(1)}s` : data.output.slice(-200));
       break;
     case 'build.completed':
+      state.built = true;
       setPhase('built');
       [...SPECIALISTS.map((a) => a.id), hub].forEach((id) => setNode(id, 'done'));
       addTimeline(data.kind === 'feature' ? 'Feature verified' : 'Build verified', 'green', `${data.version} · ${data.files.length} files in the module`);
-      scheduleRefresh();
+      scheduleRefresh(true);
       break;
     case 'build.failed':
+      state.built = !data.rolled_back;
       if (data.rolled_back) setPhase('failed', 'The feature could not pass the tests and the module was restored. Start a new feature with a more specific description.');
       else setPhase('built', 'The build could not pass its own tests. Describe the problem for the Builder, or start a new run.');
       scheduleRefresh();
@@ -226,6 +346,7 @@ function handle(event) {
     case 'revision.completed':
       setPhase('built');
       scheduleRefresh();
+      scheduleRefresh(true);
       addTimeline(`Change ${data.number} applied`, 'green', `${data.files.join(', ')}`);
       break;
     case 'revision.failed':
@@ -258,7 +379,10 @@ function handle(event) {
       setNode(hub, 'done');
       break;
     case 'agent.failed':
-      setPhase('failed');
+      state.canRetry = data.agent_id === 'builder' && !!state.approved && !state.built;
+      // A module already exists: a failed change must not lock the chat, the developer can try again.
+      if (state.built) setPhase('built', `The last change could not run: ${data.error}`);
+      else setPhase('failed', state.canRetry ? 'The plan is approved and kept. Retry the build without planning again.' : '');
       setNode(data.agent_id, 'failed');
       setEdge(data.agent_id, '');
       addTimeline(`${NAMES[data.agent_id] || data.agent_id} failed`, 'red', data.error);
@@ -300,6 +424,9 @@ function syncUrl() {
 
 function resetConsole() {
   state.source?.close();
+  state.approved = false;
+  state.built = false;
+  state.canRetry = false;
   Object.assign(state, { runId: null, cursor: 0, shown: new Set(), queue: Promise.resolve() });
   $('#messages').replaceChildren(emptyState());
   $('#prompt').value = '';
@@ -308,6 +435,7 @@ function resetConsole() {
   setPhase('idle');
   populateRuns();
   syncUrl();
+  showTab(state.project?.versions ? 'module' : 'agents');
 }
 
 // "New run" / "New feature" button: a blank console that creates a run in the current project.
@@ -419,7 +547,7 @@ function populateRuns() {
 }
 
 let refreshTimer = null;
-function scheduleRefresh() {
+function scheduleRefresh(reloadModule = false) {
   if (!state.projectId) return;
   clearTimeout(refreshTimer);
   refreshTimer = setTimeout(async () => {
@@ -427,6 +555,11 @@ function scheduleRefresh() {
       state.project = await api(`/api/v1/projects/${state.projectId}`);
       $('#new-run').textContent = state.project.versions ? 'New feature' : 'New run';
       populateRuns();
+      if (reloadModule && (state.project.versions || state.project.files)) {
+        $('#module-busy').hidden = true;
+        showTab('module');
+        ensurePreview(true);
+      }
     } catch (error) { console.error(error); }
   }, 300);
 }
@@ -472,6 +605,10 @@ async function init() {
   $('#composer').addEventListener('submit', send);
   $('#show-activity').addEventListener('change', (e) => $('#messages').classList.toggle('hide-activity', !e.target.checked));
   $('#new-run').addEventListener('click', resetConsole);
+  TABS.forEach((tab) => $(`#tab-${tab}`).addEventListener('click', () => showTab(tab)));
+  $('#chat-collapse').addEventListener('click', () => setChat(false));
+  $('#chat-rail').addEventListener('click', () => setChat(true));
+  $('#preview-reload').addEventListener('click', () => ensurePreview(true));
   $('#home-link').addEventListener('click', showHome);
   $('#new-project').addEventListener('click', () => { $('#project-form').hidden = false; $('#project-error').textContent = ''; $('#project-name').focus(); });
   $('#project-cancel').addEventListener('click', () => { $('#project-form').hidden = true; });
@@ -487,6 +624,18 @@ async function init() {
     }
   });
   $('#run-select').addEventListener('change', (e) => (e.target.value ? openProject(state.projectId, e.target.value) : resetConsole()));
+  $('#retry').addEventListener('click', async () => {
+    state.canRetry = false;
+    setPhase('running');
+    try {
+      await api(`/api/v1/runs/${state.runId}/retry`, { method: 'POST' });
+      openStream(state.cursor);
+    } catch (error) {
+      showError(error.message);
+      state.canRetry = true;
+      setPhase('failed', 'The plan is approved and kept. Retry the build without planning again.');
+    }
+  });
   $('#approve').addEventListener('click', async () => {
     setPhase('running');
     try {

@@ -4,7 +4,25 @@
     {
       "name": "module-foundry",
       "runtimeExecutable": "env",
-      "runtimeArgs": ["PYTHONPATH=src", "MODULE_FOUNDRY_PROVIDER=replay", "REPLAY_DELAY=0.4", ".venv/bin/python", "-m", "module_platform"],
+      "runtimeArgs": [
+        "PYTHONPATH=src",
+        "MODULE_FOUNDRY_PROVIDER=replay",
+        "REPLAY_DELAY=0.4",
+        ".venv/bin/python",
+        "-m",
+        "module_platform"
+      ],
+      "port": 8080
+    },
+    {
+      "name": "module-foundry-claude",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "PYTHONPATH=src",
+        ".venv/bin/python",
+        "-m",
+        "module_platform"
+      ],
       "port": 8080
     }
   ]

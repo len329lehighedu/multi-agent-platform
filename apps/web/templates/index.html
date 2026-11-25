@@ -30,10 +30,12 @@
   </main>
 
   <main id="console" class="layout" hidden>
-    <section class="card chat" aria-label="Conversation">
+    <section class="card chat" id="chat" aria-label="Conversation">
+      <button id="chat-rail" class="chat-rail" type="button" aria-label="Open conversation" aria-expanded="false" hidden><span class="rail-label">Chat</span><span id="rail-dot" class="rail-dot" hidden></span></button>
       <div class="chat-head">
         <span class="head-left"><span id="project-name-label">Conversation</span><select id="run-select" hidden aria-label="Run in this project"></select></span>
         <label class="toggle"><input type="checkbox" id="show-activity" checked> Show agent activity</label>
+        <button id="chat-collapse" class="ghost icon-btn" type="button" aria-label="Collapse conversation" title="Collapse conversation">&laquo;</button>
       </div>
       <div id="messages" class="messages" aria-live="polite">
         <div class="empty">
@@ -51,15 +53,31 @@
         </div>
         <div class="composer-row">
           <span id="status" class="status">Ready</span>
-          <span class="actions"><button id="approve" class="approve" type="button" hidden>Approve plan &amp; build</button><button id="send" type="submit">Send</button></span>
+          <span class="actions"><button id="approve" class="approve" type="button" hidden>Approve plan &amp; build</button><button id="retry" class="approve" type="button" hidden>Retry build</button><button id="send" type="submit">Send</button></span>
         </div>
       </form>
     </section>
 
     <section class="side">
       <ol id="stages" class="stages" aria-label="Run stage"></ol>
-      <div class="card graph-card">
+      <div class="tabs" role="tablist" aria-label="Workspace">
+        <button class="tab" role="tab" id="tab-module" data-tab="module" aria-selected="false">Module</button>
+        <button class="tab" role="tab" id="tab-agents" data-tab="agents" aria-selected="true">Agents</button>
+        <button class="tab" role="tab" id="tab-files" data-tab="files" aria-selected="false">Files</button>
+        <span id="preview-state" class="preview-state"></span>
+        <button id="preview-reload" class="ghost" type="button" hidden>Reload</button>
+      </div>
+      <div id="panel-module" class="card panel module-panel" role="tabpanel" aria-labelledby="tab-module" hidden>
+        <iframe id="module-frame" title="Live module preview" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"></iframe>
+        <div id="module-note" class="module-note" role="status"></div>
+        <div id="module-busy" class="module-busy" hidden><span>Agents are changing the module&hellip;</span></div>
+      </div>
+      <div id="panel-agents" class="card graph-card panel" role="tabpanel" aria-labelledby="tab-agents">
         <svg id="graph" viewBox="0 0 680 440" role="img" aria-label="Agent workflow graph"></svg>
+      </div>
+      <div id="panel-files" class="card panel files-panel" role="tabpanel" aria-labelledby="tab-files" hidden>
+        <ul id="file-list" class="file-list"></ul>
+        <pre id="file-view" class="file-view" tabindex="0">Select a file.</pre>
       </div>
     </section>
   </main>

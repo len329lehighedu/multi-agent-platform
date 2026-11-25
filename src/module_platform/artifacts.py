@@ -130,6 +130,8 @@ def check_design(task_spec: dict, brief: dict, design: dict, existing: set[str] 
             errors.append(f"files: {path} is not allowed; HTML pages and Flask are disabled, build a Bokeh-only module")
     if existing is None and not any(p.startswith("engine/") for p in paths):
         errors.append("files: science code must live under engine/")
+    if existing is None and "main.py" not in paths:
+        errors.append("files: the Bokeh entry file must be main.py (the preview runs `bokeh serve` on the module folder)")
     if not any(p.startswith("tests/") for p in paths):
         errors.append("files: tests/ is required")
     return errors

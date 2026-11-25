@@ -127,8 +127,8 @@ class WorkflowTests(Helpers):
             by_agent.setdefault(request.agent_id, []).append(request)
             self.assertTrue(request.metadata["json"])
             self.assertIn("json", request.messages[0]["content"].lower())
-        self.assertEqual(by_agent["project_manager"][0].metadata["tier"], "fast")
-        self.assertEqual(by_agent["researcher"][0].metadata["tier"], "strong")
+        self.assertEqual(by_agent["project_manager"][0].metadata["tier"], "strong")
+        self.assertEqual(by_agent["researcher"][0].metadata["tier"], "fast")
         researcher_input = by_agent["researcher"][0].messages[0]["content"]
         self.assertIn("task_spec (accepted)", researcher_input)
         self.assertNotIn("Reply with one JSON", researcher_input)

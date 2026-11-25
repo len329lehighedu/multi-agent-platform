@@ -16,15 +16,16 @@ from .orchestrator import Orchestrator
 from .store import JsonProjectStore, JsonRunStore, ProjectNotFound, RunNotFound
 from .workspaces import WorkspaceManager, module_files as list_module_files
 from .domain import RunStatus
-from .providers import OpenAIProvider, ReplayProvider
+from .providers import AnthropicProvider, OpenAIProvider, ReplayProvider
 from .workflow import PlanningWorkflow
 from .skills import SkillLibrary
 from . import artifacts as checks
 from .artifacts import ArtifactSchemas
 from .build import ModuleBuilder
+from .preview import PreviewManager
 
 
-def create_app(project_root: Path | None = None, data_root: Path | None = None, providers: dict | None = None, stream_poll: float = 0.25) -> Flask:
+def create_app(project_root: Path | None = None, data_root: Path | None = None, providers: dict | None = None, stream_poll: float = 0.25, previews: PreviewManager | None = None) -> Flask:
     root = Path(project_root or Path(__file__).resolve().parents[2])
     from dotenv import load_dotenv
     load_dotenv(root / ".env")
@@ -39,7 +40,10 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
         providers = {"replay": ReplayProvider(root / "config" / "replay" / "demo.json", delay=float(os.environ.get("REPLAY_DELAY", "1.2")))}
         if os.environ.get("OPENAI_API_KEY"):
             providers["openai"] = OpenAIProvider()
-    default_provider = os.environ.get("MODULE_FOUNDRY_PROVIDER") or ("openai" if "openai" in providers else "replay")
+        if os.environ.get("CLAUDE_API_KEY"):
+            providers["claude"] = AnthropicProvider(ledger_path=data / "spend.json", debug_dir=data / "debug")
+    # A paid provider is used only when MODULE_FOUNDRY_PROVIDER names it; the default is the free replay.
+    default_provider = os.environ.get("MODULE_FOUNDRY_PROVIDER") or "replay"
     if default_provider not in providers:
         default_provider = next(iter(providers))
     skills = SkillLibrary(root / "config" / "skills")
@@ -47,6 +51,7 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
     schemas = ArtifactSchemas.load(root / "config" / "schemas")
     workflow = PlanningWorkflow(orchestrator, providers, default_provider, skills, schemas)
     builder = ModuleBuilder(workflow)
+    previews = previews or PreviewManager()
     app = Flask(__name__, template_folder=str(root / "apps" / "web" / "templates"), static_folder=str(root / "apps" / "web" / "static"))
 
     @app.get("/")
@@ -109,6 +114,11 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
         return {**project.to_dict(), "runs": [run_summary(r) for r in runs], "run_count": len(runs),
                 "versions": built, "files": len(list_module_files(orchestrator.workspaces.project_module(project.id)))}
 
+    @app.get("/api/v1/spend")
+    def spend():
+        ledger = getattr(providers.get("claude"), "ledger", None)
+        return jsonify(spend=ledger.snapshot() if ledger else None)
+
     @app.get("/api/v1/projects")
     def list_projects():
         return jsonify(items=[project_summary(p) for p in orchestrator.projects.list()])
@@ -123,8 +133,25 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
     def get_project(project_id: str):
         return jsonify(project_summary(orchestrator.projects.get(project_id)))
 
+    @app.get("/api/v1/projects/<project_id>/preview")
+    def preview_status(project_id: str):
+        orchestrator.projects.get(project_id)
+        return jsonify(previews.status(project_id, orchestrator.workspaces.project_module(project_id)))
+
+    @app.post("/api/v1/projects/<project_id>/preview")
+    def preview_start(project_id: str):
+        orchestrator.projects.get(project_id)
+        return jsonify(previews.start(project_id, orchestrator.workspaces.project_module(project_id)))
+
+    @app.delete("/api/v1/projects/<project_id>/preview")
+    def preview_stop(project_id: str):
+        orchestrator.projects.get(project_id)
+        previews.stop(project_id)
+        return jsonify(stopped=True)
+
     @app.delete("/api/v1/projects/<project_id>")
     def delete_project(project_id: str):
+        previews.stop(project_id)
         return jsonify(deleted=True, runs_removed=orchestrator.delete_project(project_id))
 
     @app.get("/api/v1/runs")
@@ -152,6 +179,10 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
     @app.post("/api/v1/runs/<run_id>/approve")
     def approve(run_id: str):
         return jsonify(builder.approve(run_id).to_dict()), 202
+
+    @app.post("/api/v1/runs/<run_id>/retry")
+    def retry(run_id: str):
+        return jsonify(builder.retry(run_id).to_dict()), 202
 
     @app.get("/api/v1/runs/<run_id>/files")
     def module_files(run_id: str):

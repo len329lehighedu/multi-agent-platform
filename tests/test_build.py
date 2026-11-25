@@ -141,6 +141,29 @@ class BuildTests(Helpers):
         self.assertEqual(provider.builder_calls.count("repair"), 2)
         self.assertNotIn("PASSED", run["messages"][-1]["content"])
 
+    def test_change_request_works_after_a_build_that_failed_its_tests(self):
+        original = next(i["content"] for i in json.loads(FIXTURE.read_text())["builder"][1]["artifact"]["files"] if i["path"] == ENGINE)
+
+        def broken_build(_text):
+            data = json.loads(FIXTURE.read_text())["builder"][1]
+            for item in data["artifact"]["files"]:
+                if item["path"] == ENGINE:
+                    item["content"] = BROKEN
+            return ModelResponse(text=json.dumps(data), structured_output=data, usage={})
+
+        provider = Scripted(on_build=broken_build, on_repair=lambda _t: reply({ENGINE: BROKEN}),
+                            on_revision=lambda _t: reply({ENGINE: original}, "restored the fit"))
+        client, run_id = self.planned(provider)
+        client.post(f"/api/v1/runs/{run_id}/approve")
+        run = self.wait_settled(client, run_id)
+        self.assertEqual(run["status"], "needs_review")
+        self.assertEqual(run["stage"], "review")
+        response = client.post(f"/api/v1/runs/{run_id}/chat", json={"content": "fix the fit so the tests pass"})
+        self.assertEqual(response.status_code, 202)
+        run = self.wait_settled(client, run_id)
+        self.assertNotIn("agent.failed", self.types(run))
+        self.assertIn("revision.completed", self.types(run))
+
     def test_revision_that_breaks_tests_is_rolled_back(self):
         provider = Scripted(on_revision=lambda _t: reply({ENGINE: BROKEN}), on_repair=lambda _t: reply({ENGINE: BROKEN}))
         client, run_id = self.planned(provider)
@@ -184,3 +207,63 @@ class FileSetChecks(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FailOnce(Tweaked):
+    """The first Builder call fails like a provider error; later calls use the recorded replay."""
+
+    def __init__(self):
+        super().__init__()
+        self.failed = False
+
+    def generate(self, request):
+        if request.agent_id == "builder" and request.metadata.get("key", "").startswith("file_set:") and not self.failed:
+            self.failed = True
+            from module_platform.providers.base import ProviderError
+            raise ProviderError("Claude hit the output limit before finishing")
+        return super().generate(request)
+
+
+class RetryTests(Helpers):
+    def test_failed_build_can_be_retried_without_replanning(self):
+        client, run_id, plan = self.run_to_end(FailOnce())
+        self.assertEqual(client.post(f"/api/v1/runs/{run_id}/approve").status_code, 202)
+        run = self.wait_settled(client, run_id)
+        self.assertEqual(run["status"], "failed")
+        self.assertEqual(client.post(f"/api/v1/runs/{run_id}/retry").status_code, 202)
+        run = self.wait_settled(client, run_id)
+        types = [e["type"] for e in run["events"]]
+        self.assertEqual(run["status"], "ready_for_review", run["events"][-3:])
+        self.assertIn("build.retried", types)
+        self.assertIn("build.completed", types)
+
+    def test_retry_is_refused_when_nothing_failed(self):
+        client, run_id, plan = self.run_to_end(FailOnce())
+        self.assertEqual(client.post(f"/api/v1/runs/{run_id}/retry").status_code, 400)
+
+
+class AppLoadCheckTests(unittest.TestCase):
+    """Unit tests can pass while Bokeh rejects the app itself; the build must catch that."""
+
+    def run_check(self, main_source):
+        import tempfile
+        from module_platform.build import ModuleBuilder
+
+        module = Path(tempfile.mkdtemp())
+        (module / "tests").mkdir()
+        (module / "tests" / "test_ok.py").write_text("import unittest\nclass T(unittest.TestCase):\n    def test_ok(self):\n        self.assertTrue(True)\n")
+        (module / "main.py").write_text(main_source)
+        return ModuleBuilder._run_checks(module)
+
+    def test_bad_callback_signature_fails_the_build_check(self):
+        result = self.run_check("from bokeh.io import curdoc\nfrom bokeh.models import Slider\n"
+                                "def update(attr=None, old=None, new=None):\n    pass\n"
+                                "s = Slider(start=0, end=1, value=0)\ns.on_change('value', update)\ncurdoc().add_root(s)\n")
+        self.assertFalse(result["passed"])
+        self.assertIn("signature", result["output"])
+
+    def test_valid_app_passes(self):
+        result = self.run_check("from bokeh.io import curdoc\nfrom bokeh.models import Slider\n"
+                                "def update(attr, old, new):\n    pass\n"
+                                "s = Slider(start=0, end=1, value=0)\ns.on_change('value', update)\ncurdoc().add_root(s)\n")
+        self.assertTrue(result["passed"], result["output"])
