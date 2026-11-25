@@ -10,7 +10,9 @@ The foundation is synchronous and local. Long-running agent work will later retu
 
 ## Agent catalog
 
-`GET /agents` returns public agent IDs, display names, and skill IDs. System
+`GET /agents` returns public agent IDs, display names, skill IDs, the model tier, and the model and effort the
+default provider uses for that tier (`model`, `model_label` such as "Sonnet 5.5", `effort`); the console shows them
+under each agent. System
 prompts are intentionally not part of the browser-facing response.
 
 ## Runs
@@ -95,7 +97,7 @@ At most three previews run at once; the oldest is stopped first, and all stop wh
 
 ## Usage reports
 
-Computed from run events, so they need no extra logging. `GET /runs/{id}/report` returns one run: cost,
+Computed from run events, so they need no extra logging. Each Claude call records its model. `GET /runs/{id}/report` returns one run: totals per agent (`agents`, with the models used) and per model (`models`), cost,
 calls and output tokens per agent and step, repair rounds, revisions, rejected outputs grouped by kind
 and failed test runs grouped by kind (`assertion`, `bokeh_load`, `missing_package`, `syntax`,
 `import_error`, `timeout`, `exception`). `GET /reports?project_id=` aggregates real (priced,

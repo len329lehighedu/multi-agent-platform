@@ -116,13 +116,16 @@
         <section aria-labelledby="usage-run-title">
           <h3 id="usage-run-title">This run</h3>
           <p id="usage-run-summary" class="usage-summary"></p>
-          <table class="usage-table"><thead><tr><th scope="col">Step</th><th scope="col">Calls</th><th scope="col">Output tokens</th><th scope="col">Seconds</th><th scope="col">Cost</th></tr></thead><tbody id="usage-run-steps"></tbody></table>
+          <table class="usage-table"><thead><tr><th scope="col">Agent</th><th scope="col">Model</th><th scope="col">Calls</th><th scope="col">Output tokens</th><th scope="col">Cost</th></tr></thead><tbody id="usage-run-agents"></tbody></table>
+          <table class="usage-table usage-models"><thead><tr><th scope="col">Model</th><th scope="col">Calls</th><th scope="col">Output tokens</th><th scope="col">Cost</th></tr></thead><tbody id="usage-run-models"></tbody></table>
           <ul id="usage-run-issues" class="usage-issues"></ul>
         </section>
         <section aria-labelledby="usage-project-title">
           <h3 id="usage-project-title">This project, real runs</h3>
           <p id="usage-project-summary" class="usage-summary"></p>
           <div id="usage-bars" class="usage-bars"></div>
+          <h4>By model</h4>
+          <div id="usage-model-bars" class="usage-bars"></div>
           <h4>Recurring problems</h4>
           <ul id="usage-recurring" class="usage-issues"></ul>
         </section>

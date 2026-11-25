@@ -18,6 +18,10 @@ class OpenAIProvider:
         override = os.getenv(f"OPENAI_MODEL_{tier.upper()}") if tier else None
         return override or self.model
 
+    def describe(self, tier: str | None) -> dict:
+        model = self._model_for(tier)
+        return {"model": model, "model_label": model, "effort": None}
+
     def _get_client(self):
         if self._client is None:
             from openai import OpenAI

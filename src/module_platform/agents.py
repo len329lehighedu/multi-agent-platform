@@ -65,6 +65,7 @@ class AgentCatalog:
                 "id": definition.id,
                 "display_name": definition.display_name,
                 "skills": list(definition.skills),
+                "tier": definition.tier,
             }
             for definition in self._definitions.values()
         ]

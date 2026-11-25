@@ -30,6 +30,14 @@ DEFAULTS = {"fast": "claude-haiku-5-5", "strong": "claude-sonnet-5-5"}
 EFFORT = {"fast": "medium", "strong": "medium"}
 
 
+def model_label(model: str) -> str:
+    """claude-sonnet-5-5 -> Sonnet 5.5"""
+    parts = model.removeprefix("claude-").split("-")
+    if len(parts) >= 2 and all(p.isdigit() for p in parts[1:]):
+        return f"{parts[0].capitalize()} {'.'.join(parts[1:])}"
+    return model
+
+
 def price_of(model: str) -> dict:
     # Unknown model: price it like the most expensive one so the budget guard fails safe.
     return PRICES.get(model) or PRICES["claude-opus-5-5"]
@@ -116,6 +124,11 @@ class AnthropicProvider:
             return DEFAULTS["fast"]
         return self.model if self.model.startswith("claude") else DEFAULTS["strong"]
 
+    def describe(self, tier: str | None) -> dict:
+        tier = tier if tier in DEFAULTS else "strong"
+        model = self._model_for(tier)
+        return {"model": model, "model_label": model_label(model), "effort": os.getenv(f"CLAUDE_EFFORT_{tier.upper()}", EFFORT[tier])}
+
     def _get_client(self):
         if self._client is None:
             if not self._api_key:
@@ -181,7 +194,7 @@ class AnthropicProvider:
         return ModelResponse(
             text=text,
             structured_output=structured,
-            usage={**counts, "cost_usd": round(spent, 6), "total_spent_usd": round(total, 4)},
+            usage={**counts, "cost_usd": round(spent, 6), "total_spent_usd": round(total, 4), "model": model},
             provider_metadata={"provider": "claude", "model": model},
         )
 

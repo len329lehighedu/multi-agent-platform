@@ -49,6 +49,17 @@ HINTS = {
 }
 
 
+def _model_from_price(usage: dict) -> str:
+    """Older events lack the model name; the price table identifies it from tokens and cost."""
+    from .providers.anthropic_provider import PRICES, cost_usd
+
+    cost = usage.get("cost_usd")
+    if not cost:
+        return "not recorded"
+    best = min(PRICES, key=lambda model: abs(cost_usd(model, usage) - cost))
+    return best if abs(cost_usd(best, usage) - cost) <= max(1e-6, cost * 0.02) else "not recorded"
+
+
 def classify_failure(output: str) -> str:
     for kind, pattern in FAILURE_KINDS:
         if pattern.search(output or ""):
@@ -72,6 +83,8 @@ def failing_tests(output: str) -> tuple[list[str], list[str]]:
 
 def run_report(run: RunRecord) -> dict:
     steps: dict[str, dict] = {}
+    agents: dict[str, dict] = {}
+    models: dict[str, dict] = {}
     rejections: Counter = Counter()
     failures: Counter = Counter()
     repairs = revisions = 0
@@ -94,6 +107,13 @@ def run_report(run: RunRecord) -> dict:
             row["cache_read_tokens"] += usage.get("cache_read_input_tokens") or 0
             row["cost_usd"] += usage.get("cost_usd") or 0.0
             row["seconds"] += (data.get("latency_ms") or 0) / 1000
+            model = usage.get("model") or ("replay" if usage.get("replayed") else _model_from_price(usage))
+            for table, name in ((agents, data.get("agent_id")), (models, model)):
+                total = table.setdefault(name, {"calls": 0, "output_tokens": 0, "cost_usd": 0.0, "models": set()})
+                total["calls"] += 1
+                total["output_tokens"] += usage.get("output_tokens") or 0
+                total["cost_usd"] += usage.get("cost_usd") or 0.0
+                total["models"].add(model)
         elif event.type == "artifact.rejected":
             for message in data.get("errors", [])[:8]:
                 rejections[(data.get("agent_id"), classify_rejection(message))] += 1
@@ -116,9 +136,16 @@ def run_report(run: RunRecord) -> dict:
         "output_tokens": sum(r["output_tokens"] for r in rows), "calls": sum(r["calls"] for r in rows),
         "by_agent": {k: round(v, 6) for k, v in sorted(by_agent.items(), key=lambda kv: -kv[1])},
         "steps": rows, "repair_rounds": repairs, "revisions": revisions,
+        "agents": _totals(agents, "agent"), "models": _totals(models, "model"),
         "rejections": [{"agent": a, "kind": k, "count": n} for (a, k), n in rejections.most_common()],
         "test_failures": [{"kind": k, "count": n} for k, n in failures.most_common()],
     }
+
+
+def _totals(table: dict[str, dict], key: str) -> list[dict]:
+    rows = [{key: name, "calls": t["calls"], "output_tokens": t["output_tokens"], "cost_usd": round(t["cost_usd"], 6),
+             **({"models": sorted(t["models"])} if key == "agent" else {})} for name, t in table.items()]
+    return sorted(rows, key=lambda r: -r["cost_usd"])
 
 
 def aggregate(runs: list[RunRecord], include_replayed: bool = False) -> dict:
@@ -126,12 +153,18 @@ def aggregate(runs: list[RunRecord], include_replayed: bool = False) -> dict:
     if not include_replayed:  # replayed and unpriced (legacy) runs say nothing about real cost
         reports = [r for r in reports if r["priced"] and not r["replayed"]]
     by_agent: dict[str, float] = defaultdict(float)
+    by_model: dict[str, dict] = {}
     by_step: dict[str, dict] = {}
     rejections: Counter = Counter()
     failures: Counter = Counter()
     for report in reports:
         for agent, cost in report["by_agent"].items():
             by_agent[agent] += cost
+        for row in report["models"]:
+            total = by_model.setdefault(row["model"], {"model": row["model"], "calls": 0, "output_tokens": 0, "cost_usd": 0.0})
+            total["calls"] += row["calls"]
+            total["output_tokens"] += row["output_tokens"]
+            total["cost_usd"] += row["cost_usd"]
         for row in report["steps"]:
             step = re.sub(r"\d+", "#", row["step"])  # "revision 3 repair 1" -> "revision # repair #"
             key = f"{row['agent']}:{step}"
@@ -154,6 +187,7 @@ def aggregate(runs: list[RunRecord], include_replayed: bool = False) -> dict:
         "avg_cost_per_built_run": round(sum(r["cost_usd"] for r in built) / len(built), 6) if built else None,
         "by_agent": [{"agent": a, "cost_usd": round(c, 6), "share": round(c / cost, 3) if cost else 0.0}
                      for a, c in sorted(by_agent.items(), key=lambda kv: -kv[1])],
+        "by_model": [dict(row, cost_usd=round(row["cost_usd"], 6)) for row in sorted(by_model.values(), key=lambda r: -r["cost_usd"])],
         "by_step": [dict(row, cost_usd=round(row["cost_usd"], 6)) for row in sorted(by_step.values(), key=lambda r: -r["cost_usd"])],
         "rejections": [{"agent": a, "kind": k, "count": n} for (a, k), n in rejections.most_common()],
         "test_failures": [{"kind": k, "count": n} for k, n in failures.most_common()],

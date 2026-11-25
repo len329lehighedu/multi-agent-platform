@@ -21,6 +21,9 @@ class ReplayProvider:
         self._counts: dict[tuple, int] = {}
         self._lock = Lock()
 
+    def describe(self, tier: str | None) -> dict:
+        return {"model": "replay", "model_label": "Replay", "effort": None}
+
     def generate(self, request: ModelRequest) -> ModelResponse:
         recorded = self.responses.get(request.agent_id)
         if not recorded:

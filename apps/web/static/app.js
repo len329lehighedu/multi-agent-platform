@@ -11,7 +11,7 @@ const SPECIALISTS = [
 const NAMES = { [HUB.id]: HUB.name, ...Object.fromEntries(SPECIALISTS.map((a) => [a.id, a.name])) };
 const LABELS = { idle: 'Idle', running: 'Working', waiting: 'Needs you', done: 'Done', failed: 'Failed' };
 
-const state = { tab: 'agents', chatOpen: true, projectId: null, project: null, runId: null, cursor: 0, phase: 'idle', source: null, shown: new Set(), queue: Promise.resolve(), nodes: {}, edges: {} };
+const state = { models: {}, tab: 'agents', chatOpen: true, projectId: null, project: null, runId: null, cursor: 0, phase: 'idle', source: null, shown: new Set(), queue: Promise.resolve(), nodes: {}, edges: {} };
 
 function svg(tag, attrs = {}, parent) {
   const node = document.createElementNS(SVG, tag);
@@ -33,7 +33,7 @@ function buildGraph() {
   graph.replaceChildren();
   state.nodes = {};
   state.edges = {};
-  const hub = { x: 20, y: 186, w: 224, h: 68 };
+  const hub = { x: 20, y: 178, w: 224, h: 84 };
   const edgeLayer = svg('g', {}, graph);
   const nodeLayer = svg('g', {}, graph);
   const makeNode = (agent, box, badge) => {
@@ -41,6 +41,8 @@ function buildGraph() {
     svg('rect', { x: box.x, y: box.y, width: box.w, height: box.h, rx: 14 }, group);
     svg('text', { class: 'name', x: box.x + 16, y: box.y + 26 }, group).textContent = agent.name;
     svg('text', { class: 'role', x: box.x + 16, y: box.y + 43 }, group).textContent = agent.role;
+    const model = svg('text', { class: 'model', x: box.x + 16, y: box.y + 59 }, group);
+    model.textContent = state.models[agent.id] || '';
     svg('circle', { class: 'dot', cx: box.x + 20, cy: box.y + box.h - 11, r: 4 }, group);
     const label = svg('text', { class: 'state', x: box.x + 30, y: box.y + box.h - 7 }, group);
     label.textContent = LABELS.idle;
@@ -48,11 +50,11 @@ function buildGraph() {
       svg('circle', { class: 'badge', cx: box.x + box.w - 18, cy: box.y + 20, r: 11 }, group);
       svg('text', { class: 'badge-text', x: box.x + box.w - 18, y: box.y + 24 }, group).textContent = badge;
     }
-    state.nodes[agent.id] = { group, label };
+    state.nodes[agent.id] = { group, label, model };
   };
   makeNode(HUB, hub);
   SPECIALISTS.forEach((agent, index) => {
-    const box = { x: 436, y: 40 + index * 146, w: 224, h: 68 };
+    const box = { x: 436, y: 32 + index * 146, w: 224, h: 84 };
     const cy = box.y + box.h / 2;
     const d = `M${hub.x + hub.w},${hub.y + hub.h / 2} C 340,${hub.y + hub.h / 2} 340,${cy} ${box.x},${cy}`;
     state.edges[agent.id] = svg('path', { class: 'edge', d }, edgeLayer);
@@ -349,6 +351,7 @@ async function loadFiles() {
 const AGENT_LABEL = { project_manager: 'Project Manager', researcher: 'Researcher', builder: 'Module Builder', tester: 'Tester' };
 const money = (value) => `$${(value || 0).toFixed(4)}`;
 const words = (text) => text.split('_').join(' ');
+const modelName = (id) => (/^claude-[a-z]+(-\d+)+$/.test(id) ? id.replace(/^claude-/, '').replace(/^(\w)/, (c) => c.toUpperCase()).replace(/-(\d+)-(\d+)$/, ' $1.$2') : id);
 
 function cell(row, text) {
   const td = document.createElement('td');
@@ -369,7 +372,7 @@ function usageBar(item, top) {
   const bar = document.createElement('div');
   bar.className = 'usage-bar';
   bar.setAttribute('role', 'img');
-  const label = AGENT_LABEL[item.agent] || item.agent;
+  const label = AGENT_LABEL[item.agent] || modelName(item.agent);
   bar.setAttribute('aria-label', `${label}: ${money(item.cost_usd)}, ${Math.round(item.share * 100)} percent`);
   const name = document.createElement('span');
   name.textContent = label;
@@ -394,14 +397,22 @@ async function loadUsage() {
       $('#usage-run-summary').textContent = report.replayed
         ? `${report.calls} calls · replayed run, no real cost`
         : `${report.calls} calls · ${report.output_tokens} output tokens · ${money(report.cost_usd)} · ${report.repair_rounds} repair rounds · ${report.revisions} changes`;
-      $('#usage-run-steps').replaceChildren(...report.steps.map((step) => {
-        const row = document.createElement('tr');
-        cell(row, `${AGENT_LABEL[step.agent] || step.agent}: ${step.step}`);
-        cell(row, step.calls);
-        cell(row, step.output_tokens);
-        cell(row, step.seconds);
-        cell(row, money(step.cost_usd));
-        return row;
+      $('#usage-run-agents').replaceChildren(...report.agents.map((row) => {
+        const tr = document.createElement('tr');
+        cell(tr, AGENT_LABEL[row.agent] || row.agent);
+        cell(tr, row.models.map(modelName).join(', '));
+        cell(tr, row.calls);
+        cell(tr, row.output_tokens);
+        cell(tr, money(row.cost_usd));
+        return tr;
+      }));
+      $('#usage-run-models').replaceChildren(...report.models.map((row) => {
+        const tr = document.createElement('tr');
+        cell(tr, modelName(row.model));
+        cell(tr, row.calls);
+        cell(tr, row.output_tokens);
+        cell(tr, money(row.cost_usd));
+        return tr;
       }));
       issueList($('#usage-run-issues'), [
         ...report.rejections.map((r) => `${AGENT_LABEL[r.agent] || r.agent} output rejected (${words(r.kind)}) ×${r.count}`),
@@ -409,7 +420,8 @@ async function loadUsage() {
       ], 'No rejected output and no failed tests.');
     } else {
       $('#usage-run-summary').textContent = 'No run yet.';
-      $('#usage-run-steps').replaceChildren();
+      $('#usage-run-agents').replaceChildren();
+      $('#usage-run-models').replaceChildren();
       issueList($('#usage-run-issues'), [], 'Nothing to report.');
     }
     const summary = await api(`/api/v1/reports${state.projectId ? `?project_id=${state.projectId}` : ''}`);
@@ -418,6 +430,8 @@ async function loadUsage() {
       : 'No runs with real cost yet.';
     const top = Math.max(...summary.by_agent.map((a) => a.cost_usd), 1e-9);
     $('#usage-bars').replaceChildren(...summary.by_agent.map((a) => usageBar(a, top)));
+    const modelTop = Math.max(...summary.by_model.map((m) => m.cost_usd), 1e-9);
+    $('#usage-model-bars').replaceChildren(...summary.by_model.map((m) => usageBar({ agent: m.model, cost_usd: m.cost_usd, share: summary.cost_usd ? m.cost_usd / summary.cost_usd : 0 }, modelTop)));
     issueList($('#usage-recurring'), summary.recurring.map((r) => `${words(r.source.replace(':', ' '))} (${AGENT_LABEL[r.agent] || r.agent}, ×${r.count}): ${r.hint}`),
       'Nothing has recurred yet.');
   } catch (error) {
@@ -898,7 +912,18 @@ async function restore(runId) {
   }
 }
 
+async function loadModels() {
+  try {
+    const { items } = await api('/api/v1/agents');
+    items.forEach((agent) => {
+      if (agent.model_label) state.models[agent.id] = agent.effort ? `${agent.model_label} · ${agent.effort}` : agent.model_label;
+    });
+    Object.entries(state.nodes).forEach(([id, node]) => { node.model.textContent = state.models[id] || ''; });
+  } catch (error) { console.error(error); }
+}
+
 async function init() {
+  loadModels();
   $('#composer').addEventListener('submit', send);
   $('#show-activity').addEventListener('change', (e) => $('#messages').classList.toggle('hide-activity', !e.target.checked));
   $('#new-run').addEventListener('click', resetConsole);

@@ -114,6 +114,7 @@ option { background: var(--panel-2); }
 @keyframes pulse { 50% { stroke-opacity: .35; } }
 .node .name { font-size: 14px; font-weight: 700; fill: var(--ink); }
 .node .role { font: 10px var(--mono); fill: var(--muted); }
+.node .model { font: 600 10px var(--mono); fill: var(--blue); }
 .node .state { font: 600 11px var(--mono); fill: var(--muted); }
 .node .dot { fill: var(--idle); }
 .node.running .dot, .node.running .state { fill: var(--blue); }
@@ -224,10 +225,10 @@ option { background: var(--panel-2); }
 .usage-issues li { margin-bottom: 4px; }
 .usage-issues .muted { list-style: none; margin-left: -18px; }
 .usage-bars { display: grid; gap: 6px; }
-.usage-bar { display: grid; grid-template-columns: 130px 1fr 90px; align-items: center; gap: 10px; font: 12px var(--mono); }
+.usage-bar { display: grid; grid-template-columns: 130px 1fr 130px; align-items: center; gap: 10px; font: 12px var(--mono); }
 .usage-bar .track { height: 10px; border-radius: 99px; background: var(--raise); overflow: hidden; }
 .usage-bar .fill { display: block; height: 100%; border-radius: 99px; background: var(--blue); }
-.usage-bar .value { text-align: right; font-variant-numeric: tabular-nums; }
+.usage-bar .value { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* criterion question */
 .criterion-box { margin-bottom: 10px; padding: 12px 14px; border: 1px solid rgba(168, 101, 0, .4); border-radius: 10px; background: rgba(242, 176, 74, .12); }
@@ -297,3 +298,4 @@ option { background: var(--panel-2); }
 .library-card p, .library-card dd { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
 .library-card p { -webkit-line-clamp: 4; }
 .library-card dd { -webkit-line-clamp: 3; }
+.usage-models { margin-top: 14px; }

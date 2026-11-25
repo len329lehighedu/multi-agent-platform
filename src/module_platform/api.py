@@ -93,7 +93,9 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
 
     @app.get("/api/v1/agents")
     def agents():
-        return jsonify(items=orchestrator.agents.public_definitions())
+        provider = providers.get(default_provider)
+        describe = getattr(provider, "describe", None)
+        return jsonify(items=[{**item, **(describe(item["tier"]) if describe else {})} for item in orchestrator.agents.public_definitions()])
 
     @app.post("/api/v1/runs")
     def create_run():
