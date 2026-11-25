@@ -159,7 +159,7 @@ function setPhase(phase, hint = '') {
   updateRail();
   $('#module-busy').hidden = !(phase === 'running' && state.project?.versions);
   syncEditor();
-  $('#prompt').placeholder = phase === 'waiting' ? 'Type your answer…' : phase === 'built' ? 'Describe a change (layout, labels, colours…) or a new feature' : 'e.g. A module that fits a SINDy model to pendulum data, tests it, and predicts';
+  $('#prompt').placeholder = phase === 'waiting' ? 'Type your answer…' : phase === 'built' ? 'Describe a change (layout, labels, colours…) or a new feature' : '';
   if (phase === 'waiting') $('#prompt').focus();
 }
 
@@ -621,10 +621,15 @@ function resetConsole() {
 const reset = resetConsole;
 
 /* ---------- home and projects ---------- */
-const RUN_STATUS = {
-  active: ['Working', 'blue'], awaiting_user: ['Needs you', 'amber'], ready_for_review: ['Ready', 'green'],
-  needs_review: ['Needs review', 'amber'], failed: ['Failed', 'amber'],
-};
+const LANES = [
+  ['planning', 'Planning', 'Nothing is being planned.'],
+  ['needs_you', 'Needs you', 'Nothing is waiting for you.'],
+  ['building', 'Building', 'No module is being built.'],
+  ['ready', 'Ready', 'No module is ready yet.'],
+  ['failed', 'Failed', 'Nothing has failed.'],
+];
+const STRIP_LABELS = ['intake', 'planning', 'architecture', 'building', 'qa', 'review'];
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 function projectCard(project) {
   const wrap = document.createElement('div');
@@ -632,23 +637,33 @@ function projectCard(project) {
   const card = document.createElement('button');
   card.type = 'button';
   card.className = 'project-card';
-  const latest = project.runs[0];
   const title = document.createElement('h2');
   title.textContent = project.name;
   const goal = document.createElement('p');
-  goal.textContent = latest ? latest.goal : 'No runs yet. Open it and describe the module.';
-  const meta = document.createElement('div');
-  meta.className = 'project-meta';
-  const chips = [[project.versions ? `${project.versions} version${project.versions > 1 ? 's' : ''}` : 'Not built', project.versions ? 'green' : 'amber'],
-    [`${project.run_count} run${project.run_count === 1 ? '' : 's'}`, '']];
-  if (latest && RUN_STATUS[latest.status]) chips.push(RUN_STATUS[latest.status]);
-  chips.forEach(([text, tone]) => {
-    const chip = document.createElement('span');
-    chip.className = `chip ${tone}`;
-    chip.textContent = text;
-    meta.append(chip);
+  goal.textContent = project.title || project.summary || 'No runs yet.';
+  const strip = document.createElement('div');
+  strip.className = 'assay';
+  strip.setAttribute('role', 'img');
+  strip.setAttribute('aria-label', `Stages: ${project.strip.map((state, i) => `${STRIP_LABELS[i]} ${state}`).join(', ')}`);
+  project.strip.forEach((state) => {
+    const cell = document.createElement('i');
+    cell.className = state;
+    strip.append(cell);
   });
-  card.append(title, goal, meta);
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  const left = document.createElement('span');
+  left.textContent = `${project.versions ? `v${project.versions}` : 'no module'} · ${plural(project.run_count, 'run')}`;
+  const right = document.createElement('span');
+  right.textContent = project.spend_usd ? `$${project.spend_usd.toFixed(2)} / $${(state.moduleBudget ?? 1).toFixed(2)}` : '';
+  meta.append(left, right);
+  card.append(title, goal, strip, meta);
+  if (project.column === 'needs_you' || project.column === 'failed') {
+    const reason = document.createElement('div');
+    reason.className = `card-reason ${project.column}`;
+    reason.textContent = project.reason;
+    card.append(reason);
+  }
   card.addEventListener('click', () => openProject(project.id));
   const remove = document.createElement('button');
   remove.type = 'button';
@@ -657,7 +672,7 @@ function projectCard(project) {
   remove.title = 'Delete project';
   remove.textContent = 'Delete';
   remove.addEventListener('click', async () => {
-    const runs = `${project.run_count} run${project.run_count === 1 ? '' : 's'}`;
+    const runs = plural(project.run_count, 'run');
     if (!confirm(`Delete "${project.name}"?\n\nThis permanently deletes its module files and ${runs}. This cannot be undone.`)) return;
     try {
       await api(`/api/v1/projects/${project.id}`, { method: 'DELETE' });
@@ -670,6 +685,116 @@ function projectCard(project) {
   return wrap;
 }
 
+// Illustrative notebook covers. The plots do not represent measured project data.
+function moduleCover(project) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 640;
+  canvas.height = 170;
+  canvas.setAttribute('aria-hidden', 'true');
+  const ctx = canvas.getContext('2d');
+  const clusters = /knn|neighbor|classif/i.test([project.name, project.method_name].join(' '));
+  ctx.fillStyle = clusters ? '#e6f1eb' : '#eaf0fb';
+  ctx.fillRect(0, 0, 640, 170);
+  ctx.fillStyle = clusters ? '#abc9bf' : '#b8c8dc';
+  for (let x = 12; x < 640; x += 18) {
+    for (let y = 12; y < 170; y += 18) ctx.fillRect(x, y, 1.4, 1.4);
+  }
+  for (let i = 0; i < 72; i++) {
+    const t = i / 71;
+    const group = i % 3;
+    const x = clusters ? 140 + group * 165 + 74 * Math.sin(i * 7.3) : 32 + 576 * t;
+    const trend = 134 - 98 * t;
+    const y = clusters ? 74 + 20 * group + 38 * Math.cos(i * 3.4) : trend + 24 * Math.sin(i * 5.1);
+    ctx.fillStyle = clusters ? ['#217768', '#447eae', '#bd7537'][group] : '#799ecf';
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+  if (!clusters) {
+    ctx.strokeStyle = '#254d87';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(32, 134);
+    ctx.lineTo(608, 36);
+    ctx.stroke();
+  }
+  return canvas;
+}
+
+function libraryCard(project) {
+  const card = document.createElement('article');
+  card.className = 'library-card';
+  const body = document.createElement('div');
+  const status = document.createElement('small');
+  status.textContent = LANES.find(([key]) => key === project.column)?.[1] || 'Planning';
+  const heading = document.createElement('h2');
+  const link = document.createElement('a');
+  link.href = '?project=' + encodeURIComponent(project.id);
+  link.textContent = project.title || project.name;
+  heading.append(link);
+  const description = document.createElement('p');
+  description.textContent = project.learning_objective || project.summary || 'Open the project to define its learning objective.';
+  const facts = document.createElement('dl');
+  for (const [label, value] of [['Method', project.method_name || 'Awaiting research'], ['Audience', project.audience || 'To be defined']]) {
+    const term = document.createElement('dt');
+    term.textContent = label;
+    const detail = document.createElement('dd');
+    detail.textContent = value;
+    facts.append(term, detail);
+  }
+  body.append(status, heading, description, facts);
+  card.append(moduleCover(project), body);
+  return card;
+}
+
+function renderLab(items, spend) {
+  const library = $('#module-library');
+  library.replaceChildren(...items.map(libraryCard));
+  if (!items.length) library.textContent = 'Create your first project to add a module to the library.';
+  const waiting = items.filter((p) => p.column === 'needs_you').length;
+  const modules = items.filter((p) => p.has_module).length;
+  const stats = $('#lab-stats');
+  stats.replaceChildren();
+  [[items.length, 'project'], [modules, 'module'], [waiting, 'waiting for you']].forEach(([n, word], i) => {
+    if (i) stats.append(' · ');
+    const b = document.createElement('b');
+    b.textContent = n;
+    stats.append(b, ` ${word === 'waiting for you' ? word : plural(n, word).replace(/^\d+ /, '')}`);
+  });
+  $('#lab-budget').hidden = !spend;
+  if (spend) {
+    const share = Math.min(1, spend.total_usd / spend.budget_usd);
+    $('#budget-fill').style.width = `${Math.max(share * 100, 1)}%`;
+    $('#budget-text').textContent = `$${spend.total_usd.toFixed(2)} of $${spend.budget_usd.toFixed(0)}`;
+    $('#budget-meter').setAttribute('aria-label', `API spend ${spend.total_usd.toFixed(2)} of ${spend.budget_usd} dollars`);
+    state.moduleBudget = spend.module_budget_usd;
+  }
+  const lanes = LANES.map(([key, label, empty]) => {
+    const lane = document.createElement('section');
+    lane.className = `lane ${key}${items.some((p) => p.column === key) ? ' has-items' : ''}`;
+    lane.setAttribute('aria-label', label);
+    const head = document.createElement('h2');
+    head.className = 'lane-head';
+    const name = document.createElement('span');
+    name.textContent = label;
+    const members = items.filter((p) => p.column === key);
+    const count = document.createElement('span');
+    count.className = 'lane-count';
+    count.textContent = members.length;
+    head.append(name, count);
+    lane.append(head);
+    if (members.length) members.forEach((p) => lane.append(projectCard(p)));
+    else {
+      const note = document.createElement('p');
+      note.className = 'lane-empty';
+      note.textContent = key === 'planning' && !items.length ? 'No projects yet. Create one to start building a module.' : empty;
+      lane.append(note);
+    }
+    return lane;
+  });
+  $('#board').replaceChildren(...lanes);
+}
+
 async function showHome() {
   state.source?.close();
   Object.assign(state, { projectId: null, project: null, runId: null });
@@ -677,18 +802,11 @@ async function showHome() {
   $('#console').hidden = true;
   $('#new-run').hidden = true;
   $('#new-project').hidden = false;
-  $('#crumb').textContent = 'Developer console';
+  $('#crumb').textContent = 'Lab';
   history.replaceState(null, '', location.pathname);
-  const { items } = await api('/api/v1/projects');
-  const list = $('#project-list');
-  if (!items.length) {
-    const empty = document.createElement('p');
-    empty.className = 'muted';
-    empty.textContent = 'No projects yet. Create one to start building a module.';
-    list.replaceChildren(empty);
-  } else {
-    list.replaceChildren(...items.map(projectCard));
-  }
+  const [{ items }, { spend }] = await Promise.all([api('/api/v1/projects'), api('/api/v1/spend').catch(() => ({ spend: null }))]);
+  items.sort((a, b) => (b.last_activity || '').localeCompare(a.last_activity || ''));
+  renderLab(items, spend);
 }
 
 function enterConsole(project) {

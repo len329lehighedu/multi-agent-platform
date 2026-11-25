@@ -16,17 +16,26 @@
   </header>
 
   <main id="home" class="home" hidden>
-    <div class="home-head">
-      <h1>Projects</h1>
+    <div class="lab-bar">
+      <h1>Module library</h1>
+      <p id="lab-stats" class="lab-stats"></p>
+      <div id="lab-budget" class="lab-budget" hidden>
+        <span>API spend</span>
+        <span class="budget-meter" role="img" id="budget-meter"><i id="budget-fill"></i></span>
+        <span id="budget-text" class="budget-text"></span>
+      </div>
     </div>
     <form id="project-form" class="project-form card" hidden>
       <label for="project-name">Project name</label>
-      <input id="project-name" maxlength="80" placeholder="SINDy pendulum" autocomplete="off" required>
+      <input id="project-name" maxlength="80" autocomplete="off" required>
       <button class="primary" type="submit">Create</button>
       <button id="project-cancel" class="ghost" type="button">Cancel</button>
       <span id="project-error" class="form-error" role="alert"></span>
     </form>
-    <div id="project-list" class="project-list"></div>
+    <section id="module-library" class="module-library" aria-label="Learning modules"></section>
+    <details class="pipeline"><summary>Project pipeline</summary>
+      <div id="board" class="board" aria-label="Projects by stage"></div>
+    </details>
   </main>
 
   <main id="console" class="layout" hidden>
@@ -60,7 +69,7 @@
             <button id="criterion-stop" class="ghost danger" type="button">Stop the build</button>
           </div>
         </div>
-        <textarea id="prompt" rows="3" placeholder="e.g. A module that fits a SINDy model to pendulum data, tests it, and predicts" required></textarea>
+        <textarea id="prompt" rows="3" required></textarea>
         <div id="mode-row" class="mode-row" hidden>
           <label><input type="radio" name="mode" value="change" checked> Change this module</label>
           <label><input type="radio" name="mode" value="feature"> New feature (plans first)</label>

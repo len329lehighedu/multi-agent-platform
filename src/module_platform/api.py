@@ -24,6 +24,7 @@ from .artifacts import ArtifactSchemas
 from .build import ModuleBuilder
 from .preview import PreviewManager
 from . import reports
+from . import board
 
 
 def create_app(project_root: Path | None = None, data_root: Path | None = None, providers: dict | None = None, stream_poll: float = 0.25, previews: PreviewManager | None = None) -> Flask:
@@ -107,13 +108,17 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
     def run_summary(run):
         return {"id": run.id, "goal": run.goal, "kind": run.kind, "status": run.status.value, "stage": run.stage.value,
                 "created_at": run.created_at, "updated_at": run.updated_at,
-                "built": any(e.type == "build.completed" for e in run.events)}
+                "built": board.has_module(run)}
+
+    def project_spend(project_id: str):
+        ledger = getattr(providers.get("claude"), "ledger", None)
+        return ledger.snapshot()["by_project"].get(project_id, 0.0) if ledger else None
 
     def project_summary(project):
         runs = [r for r in orchestrator.store.list() if r.project_id == project.id]
-        built = sum(any(e.type == "build.completed" for e in r.events) for r in runs)
-        return {**project.to_dict(), "runs": [run_summary(r) for r in runs], "run_count": len(runs),
-                "versions": built, "files": len(list_module_files(orchestrator.workspaces.project_module(project.id)))}
+        files = len(list_module_files(orchestrator.workspaces.project_module(project.id)))
+        state = board.project_state(runs, files, project_spend(project.id))
+        return {**project.to_dict(), **state, "runs": [run_summary(r) for r in runs], "run_count": len(runs), "files": files}
 
     @app.get("/api/v1/runs/<run_id>/report")
     def run_report(run_id: str):
