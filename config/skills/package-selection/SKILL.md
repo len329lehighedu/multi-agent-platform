@@ -17,3 +17,5 @@ For every package record `name`, an exact pinned `version`, `purpose`, `license`
 - State anything that conflicts with the fixed stack.
 
 Do not write install scripts.
+
+`packages` in the research brief must have at least one entry, even when the method needs nothing beyond the given stack. List every library the module imports beyond the standard library (for example `numpy`), with the pinned version, and `verified: false` plus a risk line when you did not check it. An empty list is rejected.

@@ -16,3 +16,5 @@ Map every case to criterion IDs. Choose the cheapest layer that can prove the cr
 **UI edge cases.** Test or predict with no trained model; double click on train; delete the selected run; switch tabs before any run; two sessions do not share state; upload then clear.
 
 Include at least one edge case per layer used. Write failing-condition assertions, not only happy paths. Determinism: fix every seed.
+
+**Rules from real runs.** Write cases the module can pass: derive numeric thresholds from the oracle's tolerance with margin, and report a criterion you think unreachable as a risk instead of encoding it as a hard assertion. Use only `unittest` (no `pytest`). A passing unit suite does not prove the app opens: the platform loads `main.py` as a Bokeh app after the tests, so UI contract tests must build every tab with real Bokeh models and register its callbacks.

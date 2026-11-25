@@ -15,3 +15,5 @@ An oracle is a check that does not reuse the implementation it judges.
 - Fill `covers` with the IDs of every `scientific_oracle` criterion in the task spec.
 
 Do not claim the oracle has been run.
+
+**Check that a numeric criterion is reachable before you adopt it.** A threshold or range given by the user (for example "best polynomial degree between 3 and 6") is a claim about this data, sample size and noise, not a fact. Reason about it (how many points, how much noise, what the method can resolve), write a feasible range with margin into the oracle, and list the user's number under `risks` as unconfirmed when you cannot show it. In a real build the stated range was missed (measured best 8) and the tests could not pass, because the criterion, not the code, was wrong. Prefer ranges over single values and rates over single seeds (for example "best degree in the range for at least 70% of seeds").
