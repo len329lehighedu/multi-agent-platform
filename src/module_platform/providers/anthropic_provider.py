@@ -27,7 +27,7 @@ PRICES = {
     "claude-opus-5-5": {"in": 4.00, "out": 20.00, "cache": 0.20},
 }
 DEFAULTS = {"fast": "claude-haiku-5-5", "strong": "claude-sonnet-5-5"}
-EFFORT = {"fast": "low", "strong": "medium"}
+EFFORT = {"fast": "medium", "strong": "medium"}
 
 
 def price_of(model: str) -> dict:

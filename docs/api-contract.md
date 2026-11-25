@@ -70,6 +70,16 @@ plain text. Events: `plan.approved`, `build.files_written`, `build.checks` (`pas
 stopped while the Builder was writing (a provider error such as an output limit). It returns 400 in
 any other state. Event: `build.retried`.
 
+`PUT /runs/{run_id}/files/{path}` with `{"content": "...", "by": "name"}` saves a developer's edit to a
+module file. It applies the Builder's rules (relative path inside the module, an allowed suffix,
+at most 200,000 characters), takes the project's single-writer claim (400 while an agent is writing),
+makes a git snapshot `manual edit: <path>`, runs the same checks as a build (unit tests and the Bokeh
+app load) and returns `{"saved", "path", "commit", "checks"}`. A file whose checks fail is kept, with
+the failing output returned. Event: `file.edited` (`path`, `by`, `commit`, `checks_passed`).
+`POST /runs/{run_id}/revert-edit` with `{"commit": "<sha>"}` undoes the latest manual edit, only when it
+is still the newest snapshot (else 400); event `file.edit_reverted`. The console's Files tab is the
+editor for these routes, and it restarts the preview after each save.
+
 ## Live preview
 
 The module is a Bokeh directory app whose entry file is `main.py`. The platform serves it with
@@ -82,6 +92,31 @@ The module is a Bokeh directory app whose entry file is `main.py`. The platform 
 - `DELETE /projects/{id}/preview` stops it. Deleting a project also stops its preview.
 
 At most three previews run at once; the oldest is stopped first, and all stop when the platform exits.
+
+## Usage reports
+
+Computed from run events, so they need no extra logging. `GET /runs/{id}/report` returns one run: cost,
+calls and output tokens per agent and step, repair rounds, revisions, rejected outputs grouped by kind
+and failed test runs grouped by kind (`assertion`, `bokeh_load`, `missing_package`, `syntax`,
+`import_error`, `timeout`, `exception`). `GET /reports?project_id=` aggregates real (priced,
+not replayed) runs and lists `recurring` problems (two or more) with a hint of the skill that could
+prevent them; `include_replayed=1` adds replayed runs. `PYTHONPATH=src .venv/bin/python -m
+module_platform.reports` writes the same summary to `var/reports/usage.md`. The console shows it in the
+Usage tab.
+
+## Criterion questions
+
+When tests tied to an acceptance criterion still fail after one repair round, and every failure is an
+assertion in a test named after a criterion ID (`test_ac1_...`, no crash, no Bokeh load error), the
+Builder is asked once per build whether the code or the threshold is wrong. A `threshold` verdict is
+accepted only when its `measured` value appears in the real test output; then the run pauses
+(`awaiting_user`, event `criterion.question` with `criterion_id`, `statement`, `measured`, `current`,
+`proposed`, `reason`). A `code_bug` verdict keeps repairing (event `criterion.checked`).
+
+`POST /runs/{id}/criterion` with `{"decision": "accept" | "keep" | "stop"}` answers it (HTTP 202;
+event `criterion.answered`). `accept` lets the Builder change only that assertion (`criterion.amended`,
+listed in the final summary and given to the Tester), `keep` gives the Builder further repair rounds
+(`criterion.kept`), `stop` ends the build like a failed build. Chat returns 400 while a question waits.
 
 ## Spend
 

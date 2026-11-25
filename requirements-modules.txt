@@ -1,0 +1,2 @@
+# Optional science packages offered to generated modules, on top of requirements.lock.txt
+torch==2.15.0

@@ -187,7 +187,17 @@ option { background: var(--panel-2); }
 .file-list button { display: block; width: 100%; padding: 5px 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); text-align: left; overflow-wrap: anywhere; }
 .file-list button:hover { background: var(--panel-2); color: var(--ink); }
 .file-list button[aria-current="true"] { background: var(--blue-soft); color: var(--blue); }
-.file-view { margin: 0; padding: 14px; overflow: auto; font: 12px/1.55 var(--mono); color: var(--ink); white-space: pre; }
+.editor { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.editor-bar { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.editor-path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 12px var(--mono); }
+.editor-status { color: var(--muted); font: 12px var(--mono); }
+.editor-status.ok { color: var(--green); } .editor-status.warn { color: var(--amber); }
+.editor-bar .primary, .editor-bar .ghost { padding: 5px 12px; font-size: 12px; }
+.editor-bar .primary:disabled { opacity: .4; cursor: not-allowed; }
+.file-editor { flex: 1; min-height: 0; width: 100%; resize: none; padding: 14px; border: 0; background: #fff; color: var(--ink); font: 12px/1.55 var(--mono); tab-size: 4; white-space: pre; overflow: auto; }
+.file-editor:focus { outline: none; box-shadow: inset 0 0 0 2px var(--blue-soft); }
+.file-editor:disabled { background: var(--panel-2); color: var(--muted); }
+.check-output { margin: 0; max-height: 34%; overflow: auto; padding: 10px 14px; border-top: 1px solid var(--line); background: var(--panel-2); color: var(--ink); font: 12px/1.5 var(--mono); white-space: pre-wrap; }
 
 .icon-btn { padding: 2px 10px; font-size: 16px; line-height: 1.2; }
 .chat { position: relative; }
@@ -199,3 +209,32 @@ option { background: var(--panel-2); }
 .rail-label { writing-mode: vertical-rl; font: 600 13px var(--mono); letter-spacing: .04em; }
 .rail-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 4px rgba(168, 101, 0, .18); }
 @media (max-width: 900px) { .layout.chat-closed { grid-template-columns: 1fr; } .layout.chat-closed .chat-rail { flex-direction: row; height: 48px; padding: 0 16px; } .rail-label { writing-mode: initial; } .files-panel { grid-template-columns: 1fr; } .panel { min-height: 420px; } }
+
+/* usage */
+.usage-panel { overflow: auto; padding: 18px 20px; display: grid; gap: 28px; align-content: start; }
+.usage-panel h3 { margin: 0 0 4px; font-size: 15px; }
+.usage-panel h4 { margin: 16px 0 6px; font-size: 13px; color: var(--muted); }
+.usage-summary { margin: 0 0 10px; color: var(--muted); font: 12px var(--mono); }
+.usage-table { width: 100%; border-collapse: collapse; font: 12px var(--mono); font-variant-numeric: tabular-nums; }
+.usage-table th { text-align: left; font-weight: 600; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line-2); }
+.usage-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.usage-table td:not(:first-child), .usage-table th:not(:first-child) { text-align: right; }
+.usage-issues { margin: 8px 0 0; padding-left: 18px; font-size: 13px; color: var(--ink); }
+.usage-issues li { margin-bottom: 4px; }
+.usage-issues .muted { list-style: none; margin-left: -18px; }
+.usage-bars { display: grid; gap: 6px; }
+.usage-bar { display: grid; grid-template-columns: 130px 1fr 90px; align-items: center; gap: 10px; font: 12px var(--mono); }
+.usage-bar .track { height: 10px; border-radius: 99px; background: var(--raise); overflow: hidden; }
+.usage-bar .fill { display: block; height: 100%; border-radius: 99px; background: var(--blue); }
+.usage-bar .value { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* criterion question */
+.criterion-box { margin-bottom: 10px; padding: 12px 14px; border: 1px solid rgba(168, 101, 0, .4); border-radius: 10px; background: rgba(242, 176, 74, .12); }
+.criterion-title { margin: 0 0 8px; font-weight: 650; }
+.criterion-facts { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 0 0 8px; font: 12px var(--mono); }
+.criterion-facts dt { color: var(--muted); }
+.criterion-facts dd { margin: 0; overflow-wrap: anywhere; }
+.criterion-reason { margin: 0 0 10px; font-size: 13px; color: var(--ink); }
+.criterion-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.criterion-actions button { padding: 7px 12px; font-size: 13px; }
+.ghost.danger:hover { border-color: var(--red); color: var(--red); background: var(--panel); }

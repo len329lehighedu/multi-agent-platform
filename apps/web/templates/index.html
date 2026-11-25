@@ -46,6 +46,20 @@
       </div>
       <form id="composer" class="composer">
         <div id="hint" class="hint" hidden></div>
+        <div id="criterion-box" class="criterion-box" role="group" aria-labelledby="criterion-title" hidden>
+          <p id="criterion-title" class="criterion-title"></p>
+          <dl class="criterion-facts">
+            <dt>Measured</dt><dd id="criterion-measured"></dd>
+            <dt>Now</dt><dd id="criterion-current"></dd>
+            <dt>Proposed</dt><dd id="criterion-proposed"></dd>
+          </dl>
+          <p id="criterion-reason" class="criterion-reason"></p>
+          <div class="criterion-actions">
+            <button id="criterion-accept" class="primary" type="button">Accept new threshold</button>
+            <button id="criterion-keep" class="ghost" type="button">Keep it, fix the code</button>
+            <button id="criterion-stop" class="ghost danger" type="button">Stop the build</button>
+          </div>
+        </div>
         <textarea id="prompt" rows="3" placeholder="e.g. A module that fits a SINDy model to pendulum data, tests it, and predicts" required></textarea>
         <div id="mode-row" class="mode-row" hidden>
           <label><input type="radio" name="mode" value="change" checked> Change this module</label>
@@ -64,6 +78,7 @@
         <button class="tab" role="tab" id="tab-module" data-tab="module" aria-selected="false">Module</button>
         <button class="tab" role="tab" id="tab-agents" data-tab="agents" aria-selected="true">Agents</button>
         <button class="tab" role="tab" id="tab-files" data-tab="files" aria-selected="false">Files</button>
+        <button class="tab" role="tab" id="tab-usage" data-tab="usage" aria-selected="false">Usage</button>
         <span id="preview-state" class="preview-state"></span>
         <button id="preview-reload" class="ghost" type="button" hidden>Reload</button>
       </div>
@@ -77,7 +92,31 @@
       </div>
       <div id="panel-files" class="card panel files-panel" role="tabpanel" aria-labelledby="tab-files" hidden>
         <ul id="file-list" class="file-list"></ul>
-        <pre id="file-view" class="file-view" tabindex="0">Select a file.</pre>
+        <div class="editor">
+          <div class="editor-bar">
+            <span id="editor-path" class="editor-path">Select a file</span>
+            <span id="editor-status" class="editor-status" role="status"></span>
+            <button id="editor-revert" class="ghost" type="button" hidden>Revert last edit</button>
+            <button id="editor-save" class="primary" type="button" disabled>Save &amp; check</button>
+          </div>
+          <textarea id="file-editor" class="file-editor" spellcheck="false" aria-label="File content" disabled></textarea>
+          <pre id="check-output" class="check-output" hidden></pre>
+        </div>
+      </div>
+      <div id="panel-usage" class="card panel usage-panel" role="tabpanel" aria-labelledby="tab-usage" hidden>
+        <section aria-labelledby="usage-run-title">
+          <h3 id="usage-run-title">This run</h3>
+          <p id="usage-run-summary" class="usage-summary"></p>
+          <table class="usage-table"><thead><tr><th scope="col">Step</th><th scope="col">Calls</th><th scope="col">Output tokens</th><th scope="col">Seconds</th><th scope="col">Cost</th></tr></thead><tbody id="usage-run-steps"></tbody></table>
+          <ul id="usage-run-issues" class="usage-issues"></ul>
+        </section>
+        <section aria-labelledby="usage-project-title">
+          <h3 id="usage-project-title">This project, real runs</h3>
+          <p id="usage-project-summary" class="usage-summary"></p>
+          <div id="usage-bars" class="usage-bars"></div>
+          <h4>Recurring problems</h4>
+          <ul id="usage-recurring" class="usage-issues"></ul>
+        </section>
       </div>
     </section>
   </main>

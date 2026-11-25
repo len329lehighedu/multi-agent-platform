@@ -31,8 +31,8 @@ class Scripted(Tweaked):
             kind = key.split(":")[1]
             self.builder_calls.append(kind)
             self.requests.append(request)
-            if self.handlers[kind]:
-                return self.handlers[kind](request.messages[0]["content"])
+            if self.handlers.get(kind):
+                return self.handlers.get(kind)(request.messages[0]["content"])
         return super().generate(request)
 
 
@@ -267,3 +267,45 @@ class AppLoadCheckTests(unittest.TestCase):
                                 "def update(attr, old, new):\n    pass\n"
                                 "s = Slider(start=0, end=1, value=0)\ns.on_change('value', update)\ncurdoc().add_root(s)\n")
         self.assertTrue(result["passed"], result["output"])
+
+
+class ManualEditTests(Helpers):
+    def built(self):
+        client, run_id, plan = self.run_to_end(Tweaked())
+        client.post(f"/api/v1/runs/{run_id}/approve")
+        run = self.wait_settled(client, run_id)
+        self.assertEqual(run["status"], "ready_for_review")
+        return client, run_id
+
+    def test_saved_edit_is_checked_snapshotted_and_recorded(self):
+        client, run_id = self.built()
+        original = client.get(f"/api/v1/runs/{run_id}/files/{ENGINE}").data.decode()
+        response = client.put(f"/api/v1/runs/{run_id}/files/{ENGINE}", json={"content": original + "\n# edited by hand\n"})
+        self.assertEqual(response.status_code, 200)
+        body = response.get_json()
+        self.assertTrue(body["saved"])
+        self.assertTrue(body["checks"]["passed"], body["checks"]["output"])
+        self.assertTrue(body["commit"])
+        self.assertIn("# edited by hand", client.get(f"/api/v1/runs/{run_id}/files/{ENGINE}").data.decode())
+        events = [e["type"] for e in client.get(f"/api/v1/runs/{run_id}").get_json()["events"]]
+        self.assertIn("file.edited", events)
+
+    def test_breaking_edit_is_kept_with_failing_checks_and_can_be_reverted(self):
+        client, run_id = self.built()
+        original = client.get(f"/api/v1/runs/{run_id}/files/{ENGINE}").data.decode()
+        body = client.put(f"/api/v1/runs/{run_id}/files/{ENGINE}", json={"content": BROKEN}).get_json()
+        self.assertFalse(body["checks"]["passed"])
+        undone = client.post(f"/api/v1/runs/{run_id}/revert-edit", json={"commit": body["commit"]})
+        self.assertEqual(undone.status_code, 200, undone.get_json())
+        self.assertTrue(undone.get_json()["checks"]["passed"])
+        self.assertEqual(client.get(f"/api/v1/runs/{run_id}/files/{ENGINE}").data.decode(), original)
+
+    def test_unsafe_or_wrong_edits_are_refused(self):
+        client, run_id = self.built()
+        for path in ("../run.json", ".git/config", "evil.exe"):
+            self.assertEqual(client.put(f"/api/v1/runs/{run_id}/files/{path}", json={"content": "x"}).status_code, 400, path)
+        self.assertEqual(client.put(f"/api/v1/runs/{run_id}/files/{ENGINE}", json={"content": 5}).status_code, 400)
+
+    def test_only_the_latest_manual_edit_can_be_reverted(self):
+        client, run_id = self.built()
+        self.assertEqual(client.post(f"/api/v1/runs/{run_id}/revert-edit", json={"commit": "abc123"}).status_code, 400)

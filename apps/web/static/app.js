@@ -134,7 +134,8 @@ async function syncMessages() {
 /* ---------- phase (composer state) ---------- */
 function setPhase(phase, hint = '') {
   state.phase = phase;
-  const locked = phase === 'running' || phase === 'plan' || phase === 'failed';
+  const locked = phase === 'running' || phase === 'plan' || phase === 'failed' || phase === 'criterion';
+  $('#criterion-box').hidden = phase !== 'criterion';
   $('#prompt').disabled = locked;
   $('#send').disabled = locked;
   $('#approve').hidden = phase !== 'plan';
@@ -148,20 +149,22 @@ function setPhase(phase, hint = '') {
     waiting: 'Waiting for your answer',
     plan: 'Plan ready. Approve it to start the build.',
     built: 'Module built. Describe a change, or start a new run.',
+    criterion: 'A threshold needs your decision.',
     failed: 'Run failed. Start a new run.',
   };
   $('#status').textContent = text[phase];
   $('#hint').hidden = !hint;
   $('#hint').textContent = hint;
-  if (phase === 'waiting' || phase === 'plan') setChat(true);
+  if (phase === 'waiting' || phase === 'plan' || phase === 'criterion') setChat(true);
   updateRail();
   $('#module-busy').hidden = !(phase === 'running' && state.project?.versions);
+  syncEditor();
   $('#prompt').placeholder = phase === 'waiting' ? 'Type your answer…' : phase === 'built' ? 'Describe a change (layout, labels, colours…) or a new feature' : 'e.g. A module that fits a SINDy model to pendulum data, tests it, and predicts';
   if (phase === 'waiting') $('#prompt').focus();
 }
 
 /* ---------- workspace: tabs, live module, files, collapsible chat ---------- */
-const TABS = ['module', 'agents', 'files'];
+const TABS = ['module', 'agents', 'files', 'usage'];
 
 function showTab(name) {
   state.tab = name;
@@ -171,6 +174,7 @@ function showTab(name) {
   });
   $('#preview-reload').hidden = name !== 'module';
   if (name === 'files') loadFiles();
+  if (name === 'usage') loadUsage();
   if (name === 'module') ensurePreview(false);
 }
 
@@ -184,7 +188,7 @@ function setChat(open) {
 
 // A collapsed chat must never hide a gate: show a dot whenever the agents wait for the developer.
 function updateRail() {
-  $('#rail-dot').hidden = state.chatOpen || !['waiting', 'plan', 'failed'].includes(state.phase);
+  $('#rail-dot').hidden = state.chatOpen || !['waiting', 'plan', 'failed', 'criterion'].includes(state.phase);
 }
 
 function previewNote(text) {
@@ -235,13 +239,95 @@ async function doEnsurePreview(restart) {
   }
 }
 
+const editor = { runId: null, path: null, original: '', commit: null };
+
+function setStatus(text, tone = '') {
+  const node = $('#editor-status');
+  node.textContent = text;
+  node.className = `editor-status ${tone}`;
+}
+
+function editorLocked() {
+  return state.phase === 'running';
+}
+
+function syncEditor() {
+  const open = !!editor.path;
+  const dirty = open && $('#file-editor').value !== editor.original;
+  $('#file-editor').disabled = !open || editorLocked();
+  $('#editor-save').disabled = !dirty || editorLocked();
+  if (editorLocked() && open) setStatus('Agents are working; editing unlocks when they finish.', 'warn');
+  else if (dirty) setStatus('Unsaved changes', 'warn');
+}
+
+async function openFile(runId, path, button) {
+  if (editor.path && $('#file-editor').value !== editor.original && !confirm('Discard your unsaved changes?')) return;
+  $('#file-list').querySelectorAll('button').forEach((b) => b.removeAttribute('aria-current'));
+  button?.setAttribute('aria-current', 'true');
+  try {
+    const response = await fetch(`/api/v1/runs/${runId}/files/${path}`);
+    if (!response.ok) throw new Error('Could not read this file.');
+    const text = await response.text();
+    Object.assign(editor, { runId, path, original: text, commit: null });
+    $('#file-editor').value = text;
+    $('#editor-path').textContent = path;
+    $('#editor-revert').hidden = true;
+    $('#check-output').hidden = true;
+    setStatus('');
+    syncEditor();
+  } catch (error) {
+    setStatus(error.message, 'warn');
+  }
+}
+
+async function saveFile() {
+  if (!editor.path) return;
+  const content = $('#file-editor').value;
+  $('#editor-save').disabled = true;
+  setStatus('Saving and running the checks…');
+  try {
+    const result = await api(`/api/v1/runs/${editor.runId}/files/${editor.path}`, { method: 'PUT', body: JSON.stringify({ content }) });
+    Object.assign(editor, { original: content, commit: result.commit });
+    const ok = result.checks.passed;
+    setStatus(ok ? `Saved · checks passed (${(result.checks.duration_ms / 1000).toFixed(1)}s)` : 'Saved · checks FAILED', ok ? 'ok' : 'warn');
+    $('#check-output').hidden = ok;
+    $('#check-output').textContent = ok ? '' : result.checks.output;
+    $('#editor-revert').hidden = !result.commit;
+    addTimeline(`You edited ${editor.path}`, ok ? 'green' : 'amber', ok ? 'Checks passed.' : 'Checks failed; the file was kept.');
+    ensurePreview(true);
+  } catch (error) {
+    setStatus(error.message, 'warn');
+  }
+  syncEditor();
+}
+
+async function revertEdit() {
+  const { runId, path, commit } = editor;
+  try {
+    await api(`/api/v1/runs/${runId}/revert-edit`, { method: 'POST', body: JSON.stringify({ commit }) });
+    addTimeline(`You reverted your edit of ${path}`, 'blue');
+    ensurePreview(true);
+    editor.path = null; // reload without the unsaved-changes prompt
+    await openFile(runId, path, [...$('#file-list').querySelectorAll('button')].find((b) => b.textContent === path));
+    setStatus('Edit reverted', 'ok');
+  } catch (error) {
+    setStatus(error.message, 'warn');
+  }
+}
+
 async function loadFiles() {
   const runId = state.runId || state.project?.runs?.[0]?.id;
   const list = $('#file-list');
   list.replaceChildren();
-  $('#file-view').textContent = 'Select a file.';
+  Object.assign(editor, { runId, path: null, original: '', commit: null });
+  $('#file-editor').value = '';
+  $('#editor-path').textContent = 'Select a file';
+  $('#editor-revert').hidden = true;
+  $('#check-output').hidden = true;
+  setStatus('');
+  syncEditor();
   if (!runId || !(state.project?.versions || state.project?.files)) {
-    $('#file-view').textContent = 'No files yet.';
+    setStatus('No files yet.');
     return;
   }
   try {
@@ -251,19 +337,91 @@ async function loadFiles() {
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = file.path;
-      button.addEventListener('click', async () => {
-        list.querySelectorAll('button').forEach((b) => b.removeAttribute('aria-current'));
-        button.setAttribute('aria-current', 'true');
-        try {
-          const response = await fetch(`/api/v1/runs/${runId}/files/${file.path}`);
-          $('#file-view').textContent = response.ok ? await response.text() : 'Could not read this file.';
-        } catch (error) { $('#file-view').textContent = error.message; }
-      });
+      button.addEventListener('click', () => openFile(runId, file.path, button));
       row.append(button);
       list.append(row);
     });
   } catch (error) {
-    $('#file-view').textContent = error.message;
+    setStatus(error.message, 'warn');
+  }
+}
+
+const AGENT_LABEL = { project_manager: 'Project Manager', researcher: 'Researcher', builder: 'Module Builder', tester: 'Tester' };
+const money = (value) => `$${(value || 0).toFixed(4)}`;
+const words = (text) => text.split('_').join(' ');
+
+function cell(row, text) {
+  const td = document.createElement('td');
+  td.textContent = text;
+  row.append(td);
+}
+
+function issueList(target, items, empty) {
+  target.replaceChildren(...(items.length ? items : [empty]).map((text) => {
+    const li = document.createElement('li');
+    li.textContent = text;
+    if (!items.length) li.className = 'muted';
+    return li;
+  }));
+}
+
+function usageBar(item, top) {
+  const bar = document.createElement('div');
+  bar.className = 'usage-bar';
+  bar.setAttribute('role', 'img');
+  const label = AGENT_LABEL[item.agent] || item.agent;
+  bar.setAttribute('aria-label', `${label}: ${money(item.cost_usd)}, ${Math.round(item.share * 100)} percent`);
+  const name = document.createElement('span');
+  name.textContent = label;
+  const track = document.createElement('span');
+  track.className = 'track';
+  const fill = document.createElement('span');
+  fill.className = 'fill';
+  fill.style.width = `${(item.cost_usd / top) * 100}%`;
+  track.append(fill);
+  const value = document.createElement('span');
+  value.className = 'value';
+  value.textContent = `${money(item.cost_usd)} · ${Math.round(item.share * 100)}%`;
+  bar.append(name, track, value);
+  return bar;
+}
+
+async function loadUsage() {
+  const runId = state.runId || state.project?.runs?.[0]?.id;
+  try {
+    if (runId) {
+      const report = await api(`/api/v1/runs/${runId}/report`);
+      $('#usage-run-summary').textContent = report.replayed
+        ? `${report.calls} calls · replayed run, no real cost`
+        : `${report.calls} calls · ${report.output_tokens} output tokens · ${money(report.cost_usd)} · ${report.repair_rounds} repair rounds · ${report.revisions} changes`;
+      $('#usage-run-steps').replaceChildren(...report.steps.map((step) => {
+        const row = document.createElement('tr');
+        cell(row, `${AGENT_LABEL[step.agent] || step.agent}: ${step.step}`);
+        cell(row, step.calls);
+        cell(row, step.output_tokens);
+        cell(row, step.seconds);
+        cell(row, money(step.cost_usd));
+        return row;
+      }));
+      issueList($('#usage-run-issues'), [
+        ...report.rejections.map((r) => `${AGENT_LABEL[r.agent] || r.agent} output rejected (${words(r.kind)}) ×${r.count}`),
+        ...report.test_failures.map((f) => `Tests failed: ${words(f.kind)} ×${f.count}`),
+      ], 'No rejected output and no failed tests.');
+    } else {
+      $('#usage-run-summary').textContent = 'No run yet.';
+      $('#usage-run-steps').replaceChildren();
+      issueList($('#usage-run-issues'), [], 'Nothing to report.');
+    }
+    const summary = await api(`/api/v1/reports${state.projectId ? `?project_id=${state.projectId}` : ''}`);
+    $('#usage-project-summary').textContent = summary.runs
+      ? `${summary.runs} runs · ${money(summary.cost_usd)}${summary.avg_cost_per_built_run ? ` · ${money(summary.avg_cost_per_built_run)} per built run` : ''}`
+      : 'No runs with real cost yet.';
+    const top = Math.max(...summary.by_agent.map((a) => a.cost_usd), 1e-9);
+    $('#usage-bars').replaceChildren(...summary.by_agent.map((a) => usageBar(a, top)));
+    issueList($('#usage-recurring'), summary.recurring.map((r) => `${words(r.source.replace(':', ' '))} (${AGENT_LABEL[r.agent] || r.agent}, ×${r.count}): ${r.hint}`),
+      'Nothing has recurred yet.');
+  } catch (error) {
+    $('#usage-run-summary').textContent = error.message;
   }
 }
 
@@ -359,6 +517,27 @@ function handle(event) {
     case 'question.asked':
       setNode(data.agent_id, 'waiting', 'Needs you');
       addTimeline(`${NAMES[data.agent_id]} needs your input`, 'amber', data.question);
+      break;
+    case 'criterion.question':
+      $('#criterion-title').textContent = `${data.criterion_id}: ${data.statement}`;
+      $('#criterion-measured').textContent = data.measured;
+      $('#criterion-current').textContent = data.current || '(see the criterion)';
+      $('#criterion-proposed').textContent = data.proposed || '(none)';
+      $('#criterion-reason').textContent = data.reason;
+      setNode('builder', 'waiting', 'Needs you');
+      addTimeline(`${data.criterion_id} cannot be reached`, 'amber', `Measured ${data.measured}; proposed ${data.proposed}.`);
+      setPhase('criterion');
+      break;
+    case 'criterion.checked':
+      if (data.verdict === 'code_bug') addTimeline('Builder: the code, not the threshold, is wrong', '', 'Repairing instead of asking.');
+      break;
+    case 'criterion.answered':
+      setPhase('running');
+      setNode('builder', 'running', 'Working');
+      addTimeline(`You chose: ${{ accept: 'accept the new threshold', keep: 'keep the threshold', stop: 'stop the build' }[data.decision]}`, 'blue');
+      break;
+    case 'criterion.amended':
+      addTimeline(`${data.criterion_id} changed: ${data.current} → ${data.proposed}`, 'green', 'Approved by you; recorded in the run.');
       break;
     case 'workflow.paused':
       setPhase('waiting', `${NAMES[data.agent_id]} is waiting for your answer.`);
@@ -609,6 +788,13 @@ async function init() {
   $('#chat-collapse').addEventListener('click', () => setChat(false));
   $('#chat-rail').addEventListener('click', () => setChat(true));
   $('#preview-reload').addEventListener('click', () => ensurePreview(true));
+  $('#editor-save').addEventListener('click', saveFile);
+  $('#editor-revert').addEventListener('click', revertEdit);
+  $('#file-editor').addEventListener('input', syncEditor);
+  $('#file-editor').addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); if (!$('#editor-save').disabled) saveFile(); }
+    if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); document.execCommand('insertText', false, '    '); }
+  });
   $('#home-link').addEventListener('click', showHome);
   $('#new-project').addEventListener('click', () => { $('#project-form').hidden = false; $('#project-error').textContent = ''; $('#project-name').focus(); });
   $('#project-cancel').addEventListener('click', () => { $('#project-form').hidden = true; });
@@ -624,6 +810,19 @@ async function init() {
     }
   });
   $('#run-select').addEventListener('change', (e) => (e.target.value ? openProject(state.projectId, e.target.value) : resetConsole()));
+  [['accept', '#criterion-accept'], ['keep', '#criterion-keep'], ['stop', '#criterion-stop']].forEach(([decision, id]) => {
+    $(id).addEventListener('click', async () => {
+      if (decision === 'stop' && !confirm('Stop this build? The files are kept and you can still request changes.')) return;
+      setPhase('running');
+      try {
+        await api(`/api/v1/runs/${state.runId}/criterion`, { method: 'POST', body: JSON.stringify({ decision }) });
+        openStream(state.cursor);
+      } catch (error) {
+        showError(error.message);
+        setPhase('criterion');
+      }
+    });
+  });
   $('#retry').addEventListener('click', async () => {
     state.canRetry = false;
     setPhase('running');

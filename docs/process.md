@@ -100,6 +100,15 @@ A project is a named container for one module. Its runs share one module workspa
 - Only one run per project may write to the module at a time. Agents only receive their project's
   files and artifacts.
 
+## Who asks the user
+
+Each planning step may ask one question (the run pauses in `awaiting_user` and resumes on the answer):
+the Project Manager only when the goal or scope is unclear (it organizes and scopes the specialists'
+work), the Researcher about the depth of the science (how advanced the method is, which advanced
+hyperparameters learners control, or a number that cannot be reached), and the Builder, while
+designing, about code and system design choices (shared state, button versus live update, speed
+against accuracy). Each question states its reason and a recommended answer.
+
 ## Skills and cost
 
 Skills live in `config/skills/<name>/SKILL.md`, are owned by one role, and are
@@ -107,21 +116,28 @@ loaded by the orchestrator, not requested by the agent. Reference material loads
 only when a task tag requires it. Run
 `PYTHONPATH=src .venv/bin/python -m module_platform.skills` to see prompt sizes.
 Agents have a model tier (`fast` or `strong`) in `config/agents/manifest.json`. With Claude, `fast`
-is `CLAUDE_MODEL_FAST` (default Haiku) and `strong` is `CLAUDE_MODEL` (Sonnet); today the Project
-Manager is `strong` and the Researcher, Builder and Tester are `fast`. With OpenAI use
+is `CLAUDE_MODEL_FAST` (default Haiku) and `strong` is `CLAUDE_MODEL` (Sonnet); today the Researcher
+is `strong` (Sonnet) and the Project Manager, Builder and Tester are `fast` (Haiku), all at medium
+effort; thinking is off for fast models. Choosing a model per agent from the console is planned for deployment. With OpenAI use
 `OPENAI_MODEL_FAST` and `OPENAI_MODEL_STRONG`.
 
 Every Claude call is priced from its real usage and added to `var/spend.json`; the total budget and
 the per-module budget stop further calls with a readable error (see api-contract.md, Spend).
 Measured on the first live runs: a small module with a cross-validation feature cost about $0.15.
 
+Use the Usage tab or `python -m module_platform.reports` to see where tokens go and which problems recur
+before adding a rule to a skill: skill text is sent with every call, so only recurring problems earn one.
+
 ## Generated module contract
 
+- Modules run in the platform interpreter and may import only its installed science packages
+  (`src/module_platform/environment.py`); the list is given to the Researcher and Builder.
 - The entry file is `main.py`, a Bokeh directory app; the platform previews it with `bokeh serve`.
 - Tests use `unittest`. After they pass, the platform loads `main.py` as a Bokeh app; a callback
   with the wrong signature or a removed Bokeh class fails the build and goes to the repair loop.
-- The Builder must not loosen a test to make it pass. A criterion that cannot be reached is
-  reported in `notes` so a human decides.
+- The Builder must not loosen a test to make it pass. Tests are named after the criterion they check
+  (`test_ac1_...`); when only such assertions fail after a repair, the user is asked once whether to
+  accept a measured, reachable threshold, keep it, or stop (see api-contract.md, Criterion questions).
 - A build that stops while the Builder is writing can be retried from the approved plan
   (`POST /runs/{id}/retry`) without planning again. A build that wrote files but failed its tests
   is kept, and the developer sends a change request.

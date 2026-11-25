@@ -23,6 +23,7 @@ from . import artifacts as checks
 from .artifacts import ArtifactSchemas
 from .build import ModuleBuilder
 from .preview import PreviewManager
+from . import reports
 
 
 def create_app(project_root: Path | None = None, data_root: Path | None = None, providers: dict | None = None, stream_poll: float = 0.25, previews: PreviewManager | None = None) -> Flask:
@@ -114,6 +115,18 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
         return {**project.to_dict(), "runs": [run_summary(r) for r in runs], "run_count": len(runs),
                 "versions": built, "files": len(list_module_files(orchestrator.workspaces.project_module(project.id)))}
 
+    @app.get("/api/v1/runs/<run_id>/report")
+    def run_report(run_id: str):
+        return jsonify(reports.run_report(orchestrator.store.get(run_id)))
+
+    @app.get("/api/v1/reports")
+    def usage_report():
+        runs = orchestrator.store.list()
+        project_id = request.args.get("project_id")
+        if project_id:
+            runs = [r for r in runs if r.project_id == project_id]
+        return jsonify(reports.aggregate(runs, include_replayed=request.args.get("include_replayed") == "1"))
+
     @app.get("/api/v1/spend")
     def spend():
         ledger = getattr(providers.get("claude"), "ledger", None)
@@ -173,12 +186,19 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
         payload = json_object()
         content = str(payload.get("content", ""))
         current = orchestrator.store.get(run_id)
+        if builder.pending_criterion(current):
+            raise ValueError("answer the criterion question first: accept, keep or stop")
         run = builder.revise(run_id, content) if builder.has_build(current) else workflow.submit(run_id, content)
         return jsonify(run.to_dict()), 202
 
     @app.post("/api/v1/runs/<run_id>/approve")
     def approve(run_id: str):
         return jsonify(builder.approve(run_id).to_dict()), 202
+
+    @app.post("/api/v1/runs/<run_id>/criterion")
+    def answer_criterion(run_id: str):
+        payload = json_object()
+        return jsonify(builder.answer_criterion(run_id, str(payload.get("decision", "")), str(payload.get("note", ""))[:500]).to_dict()), 202
 
     @app.post("/api/v1/runs/<run_id>/retry")
     def retry(run_id: str):
@@ -197,6 +217,15 @@ def create_app(project_root: Path | None = None, data_root: Path | None = None, 
         if not target.is_file():
             return error("file_not_found", "file was not found", 404)
         return Response(target.read_text(encoding="utf-8", errors="replace"), mimetype="text/plain")
+
+    @app.put("/api/v1/runs/<run_id>/files/<path:file_path>")
+    def save_module_file(run_id: str, file_path: str):
+        payload = json_object()
+        return jsonify(builder.save_file(run_id, file_path, payload.get("content"), str(payload.get("by", "local-user"))))
+
+    @app.post("/api/v1/runs/<run_id>/revert-edit")
+    def revert_module_edit(run_id: str):
+        return jsonify(builder.revert_edit(run_id, str(json_object().get("commit", ""))))
 
     @app.get("/api/v1/runs/<run_id>/events")
     def events(run_id: str):

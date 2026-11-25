@@ -20,3 +20,5 @@ Produce a `task_spec` that the Researcher, Builder and Tester can work from with
 **Budget.** Set `constraints.max_train_seconds` from the audience (interactive learners: 20 or less) and `budget.max_repair_cycles` to 2 unless the user said otherwise.
 
 Do not choose the algorithm. If the user named one, record it as a constraint in `constraints.notes`.
+
+Never change a number the user stated (a threshold, a range, a default) on your own. If it looks unreachable or inconsistent, that is the one question to ask, with the reason and a proposed value; do not move it into assumptions.

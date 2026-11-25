@@ -43,6 +43,7 @@ The first API adapter uses the already verified Flask dependency. The domain and
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock.txt
+.venv/bin/python -m pip install -r requirements-modules.txt   # optional: PyTorch for modules such as PINNs
 PYTHONPATH=src .venv/bin/python -m module_platform
 ```
 

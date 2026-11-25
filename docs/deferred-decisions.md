@@ -50,9 +50,9 @@ Still open: a reverse proxy mapping `/preview/<project>/` to the port when deplo
 per-module environments (today one shared interpreter), and a real sandbox for generated code (it
 currently runs with the platform user's permissions, so keep it on localhost until that exists).
 
-## Editing module files in the console (proposal)
+## Editing module files in the console
 
-Feasible and small: an editor in the Files tab that saves through `PUT /runs/{id}/files/{path}`.
+Implemented (Nov 2026; see api-contract.md): an editor in the Files tab that saves through `PUT /runs/{id}/files/{path}`.
 The route reuses the Builder's safeguards (safe relative path, allowed suffix, size limit) and takes the
 project's single-writer claim, so it cannot overlap an agent run. A save writes the file, makes a git
 snapshot (author is the developer, so the change is attributable and revertable), runs the same

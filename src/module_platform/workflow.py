@@ -22,6 +22,7 @@ from threading import Lock, Thread
 from . import artifacts as checks
 from .artifacts import ArtifactSchemas
 from .domain import Message, RunRecord, RunStage, RunStatus
+from .environment import environment_note
 from .orchestrator import Orchestrator
 from .providers.base import ModelProvider, ModelRequest
 from .skills import SkillLibrary
@@ -46,12 +47,16 @@ class Step:
     may_ask: bool = False
     only_skills: tuple[str, ...] | None = None
     digest: bool = False  # receive condensed design_spec / test_plan instead of the full artifacts
+    ask_about: str = ""  # what this step may ask the user about (one question at most)
 
 
 STEPS = (
-    Step(MANAGER, RunStage.PLANNING, "Turn the user's request into a task_spec for an interactive data-science module (train, test, predict).", artifact="task_spec", may_ask=True),
-    Step("researcher", RunStage.ARCHITECTURE, "Decide the model, inputs, hyperparameters, algorithm, packages and the independent scientific oracle.", artifact="research_brief", needs=("task_spec",)),
-    Step("builder", RunStage.BUILDING, "Design the Bokeh-only system (no Flask, no HTML pages): files, train/test/predict separation, performance, plots, controls. Design only.", artifact="design_spec", needs=("task_spec", "research_brief")),
+    Step(MANAGER, RunStage.PLANNING, "Turn the user's request into a task_spec for an interactive data-science module (train, test, predict).", artifact="task_spec", may_ask=True,
+         ask_about="the request is ambiguous about the goal or scope (what the module is for, who uses it); leave scientific and technical choices to the specialists"),
+    Step("researcher", RunStage.ARCHITECTURE, "Decide the model, inputs, hyperparameters, algorithm, packages and the independent scientific oracle.", artifact="research_brief", needs=("task_spec",), may_ask=True,
+         ask_about="the depth of the science changes the module: how advanced the method should be, which advanced hyperparameters learners should control, or a number in the task spec that the method cannot reach for this data"),
+    Step("builder", RunStage.BUILDING, "Design the Bokeh-only system (no Flask, no HTML pages): files, train/test/predict separation, performance, plots, controls. Design only.", artifact="design_spec", needs=("task_spec", "research_brief"), may_ask=True,
+         ask_about="a code or system design choice the user must make: how tabs share state, what runs on a button versus live on a slider, or a performance trade-off (speed against accuracy)"),
     Step("tester", RunStage.QA, "Create the test plan: cases per layer, edge cases, and oracle checks. Nothing has been run yet.", artifact="test_plan", needs=("task_spec", "research_brief", "design_spec")),
     Step(MANAGER, RunStage.REVIEW, "Synthesize the specialists' accepted artifacts into the project_plan the user will approve before any build: what the module does, the algorithm, how success is defined, and what the user can do with the MVP.",
          artifact="project_plan", needs=("task_spec", "research_brief", "design_spec", "test_plan"), only_skills=("plan-synthesis", "stage-gating-and-handoff"), digest=True),
@@ -215,7 +220,8 @@ class PlanningWorkflow:
         if step.artifact:
             system_prompt += f"\nThe `artifact` is a {step.artifact} with these fields (`?` = optional):\n{self.schemas.describe(step.artifact)}\n"
         existing = {f["path"] for f in module_files(Path(run.module_path))} if run.kind == "feature" and run.module_path else None
-        messages = [{"role": "user", "content": self._feature_note(run, existing) + self._context(run, step, resumed, known)}]
+        prefix = environment_note() if agent.id in ("researcher", "builder") else ""
+        messages = [{"role": "user", "content": prefix + self._feature_note(run, existing) + self._context(run, step, resumed, known)}]
         usage: dict = {}
         started = time.monotonic()
         attempts = 0
@@ -245,7 +251,7 @@ class PlanningWorkflow:
             text += "\n\n" + checks.render_plan(known["task_spec"], reply["artifact"])
         run = store.get(run_id)
         run.append_message(Message.create("agent", text, agent_id=agent.id))
-        run.append_event("agent.completed", {"agent_id": agent.id, "step": index, "latency_ms": latency_ms, "usage": usage, "attempts": attempts})
+        run.append_event("agent.completed", {"agent_id": agent.id, "step": index, "artifact": step.artifact, "latency_ms": latency_ms, "usage": usage, "attempts": attempts})
         if question:
             run.append_event("question.asked", {"agent_id": agent.id, "step": index, "question": question})
             run.status = RunStatus.AWAITING_USER
@@ -321,7 +327,7 @@ class PlanningWorkflow:
         parts.append(f"Your task: {step.task}")
         if step.may_ask:
             parts.append("The user has answered your question; do not ask another. Set question to null and return the artifact." if resumed
-                         else "If one decision would materially change the data source, required output or an acceptance criterion, ask exactly one question and set artifact to null; otherwise set question to null and return the artifact.")
+                         else f"Ask the user exactly one question (and set artifact to null) only if {step.ask_about or 'one decision would materially change the data source, required output or an acceptance criterion'}. Give the reason and your recommended answer in the question. Otherwise set question to null and return the artifact.")
         else:
             parts.append("Set question to null.")
         parts.append("Reply with the JSON object described in your instructions.")

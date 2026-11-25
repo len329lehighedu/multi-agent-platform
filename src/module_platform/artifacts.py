@@ -8,6 +8,7 @@ receive these artifacts instead of the chat history.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 MAX_PLOTS_PER_TAB = 5
@@ -224,6 +225,19 @@ def check_file_set(file_set: dict, design: dict | None = None, existing: set[str
         for entry in design["files"]:
             if entry["path"] not in seen:
                 errors.append(f"design file not written: {entry['path']}")
+    return errors
+
+
+def check_criterion_proposal(proposal: dict, failing_ids: list[str], output: str) -> list[str]:
+    """The measured value must come from the real output, and only a failing criterion may be renegotiated."""
+    errors = []
+    if proposal["criterion_id"] not in failing_ids:
+        errors.append(f"criterion_id must be one of the failing criteria: {', '.join(failing_ids)}")
+    numbers = re.findall(r"-?\d+(?:\.\d+)?", proposal.get("measured", ""))
+    if not numbers or not all(n in output for n in numbers):
+        errors.append("measured must quote numbers that appear in the test output")
+    if proposal["verdict"] == "threshold" and not proposal.get("proposed", "").strip():
+        errors.append("a threshold proposal needs `proposed`")
     return errors
 
 

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -20,7 +21,9 @@ from pathlib import Path
 from threading import Lock, Thread
 
 from . import artifacts as checks
+from . import reports
 from .domain import Message, RunRecord, RunStage, RunStatus
+from .environment import environment_note
 from .providers.base import ModelRequest
 from .workspaces import module_files
 from .workflow import MANAGER, ArtifactRejected, PlanningWorkflow, _add_usage, condense, parse_agent_reply
@@ -33,6 +36,13 @@ BUILD_FORMAT = """
 Build mode: you write real files. Reply with one JSON object and nothing else:
 {"message": "at most 80 words: what you wrote or changed. Never claim it works; the orchestrator runs the tests and reports results", "question": null, "handoff_summary": "at most 40 words", "artifact": <file_set described below>}
 Every file is complete (never a diff or a fragment). Paths are relative to the module root.
+"""
+PROPOSAL_FORMAT = """
+Criterion check: tests tied to an acceptance criterion still fail after a repair. Decide honestly, from the real output, whether the
+code is wrong (verdict "code_bug") or the code is right and the threshold cannot be reached for this data and method (verdict
+"threshold"). Choose "threshold" only with a scientific reason, never to make a test pass. Reply with one JSON object and nothing else:
+{"message": "at most 60 words", "question": null, "handoff_summary": "at most 30 words", "artifact": <criterion proposal described below>}
+`measured` must be the value exactly as it appears in the test output. `current` is the threshold now; `proposed` a reachable one with margin.
 """
 QA_FORMAT = """
 Verification mode: you cannot run anything yourself. The orchestrator already ran the module's automated tests; their real output is in your context. Reply with one JSON object and nothing else:
@@ -89,6 +99,58 @@ class ModuleBuilder:
                 self._release_project(run.project_id)
             raise
         return run
+
+    # -- manual edits ------------------------------------------------------
+
+    def save_file(self, run_id: str, path: str, content: str, author: str = "developer") -> dict:
+        """A developer's edit: same path/suffix/size rules as the Builder, snapshotted, then checked like a build."""
+        if not isinstance(content, str):
+            raise ValueError("content must be text")
+        if not checks.safe_relative_path(path):
+            raise ValueError("invalid file path")
+        if Path(path).suffix not in checks.ALLOWED_SUFFIXES:
+            raise ValueError(f"file type not allowed (use {', '.join(sorted(checks.ALLOWED_SUFFIXES))})")
+        if len(content) > checks.MAX_FILE_CHARS:
+            raise ValueError("file too large")
+        run = self.store.get(run_id)
+        module = self.module_dir(run)
+        if not module.is_dir():
+            raise ValueError("this run has no module yet")
+        self._claim_project(run)  # one writer per project: refuses while an agent is writing
+        try:
+            target = module / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content, encoding="utf-8")
+            commit = self._commit(module, f"manual edit: {path}")
+            result = self._run_checks(module)
+            run = self.store.get(run_id)
+            run.append_event("file.edited", {"path": path, "by": author, "commit": commit, "checks_passed": result["passed"]})
+            self.store.save(run)
+            return {"saved": True, "path": path, "commit": commit, "checks": result}
+        finally:
+            self._release_project(run.project_id)
+
+    def revert_edit(self, run_id: str, commit: str) -> dict:
+        """Undo the last manual edit (only when it is still the newest snapshot, so nothing else is lost)."""
+        run = self.store.get(run_id)
+        module = self.module_dir(run)
+        self._claim_project(run)
+        try:
+            git = ["git", "-c", "user.name=Module Foundry", "-c", "user.email=foundry@localhost"]
+            head = subprocess.run(["git", "log", "-1", "--format=%h %s"], cwd=module, capture_output=True, text=True, timeout=30).stdout.strip()
+            short, _, subject = head.partition(" ")
+            if not subject.startswith("manual edit:") or not (commit and (short.startswith(commit) or commit.startswith(short))):
+                raise ValueError("only the latest manual edit can be reverted")
+            done = subprocess.run([*git, "revert", "--no-edit", "HEAD"], cwd=module, capture_output=True, text=True, timeout=30)
+            if done.returncode != 0:
+                raise ValueError("could not revert the edit")
+            result = self._run_checks(module)
+            run = self.store.get(run_id)
+            run.append_event("file.edit_reverted", {"commit": commit, "checks_passed": result["passed"]})
+            self.store.save(run)
+            return {"reverted": True, "checks": result}
+        finally:
+            self._release_project(run.project_id)
 
     def can_retry(self, run: RunRecord) -> bool:
         """A build that stopped while the Builder was writing (a provider error) can be run again from the approved plan."""
@@ -210,10 +272,16 @@ class ModuleBuilder:
             context += "\n\nYour task: write every file listed in design_spec.files, complete and consistent with the design and the engine_api. Include the tests named in design_spec so the module's own test suite can run. Reply with the JSON object described in your instructions."
         file_set = self._call_builder(run_id, label, context, known, initial=True)
         self._apply(run_id, module, file_set, label)
-        checks_result, file_set = self._check_and_repair(run_id, module, known, file_set, label)
+        checks_result, file_set = self._check_and_repair(run_id, module, known, file_set, label, allow_question=True)
+        if checks_result.get("question"):
+            self._ask_criterion(run_id, checks_result["question"], label)
+            return
+        self._finish_build(run_id, module, known, checks_result, feature, backup)
+
+    def _finish_build(self, run_id: str, module: Path, known: dict, checks_result: dict, feature: bool, backup: Path | None) -> None:
         if not checks_result["passed"]:
             if backup:
-                self._restore(run, backup, "failed feature")
+                self._restore(self.store.get(run_id), backup, "failed feature")
             self._finish_failed(run_id, "The feature could not be made to pass the tests after repair attempts, so the module was restored to its previous version. Describe the feature more specifically or start a new feature." if feature
                                 else "The module could not be made to pass its own tests after repair attempts. The files are kept in the workspace; ask the Builder to fix a specific problem, or start a new run.",
                                 rolled_back=feature)
@@ -223,6 +291,9 @@ class ModuleBuilder:
         run = self.store.get(run_id)
         version = self._version(run)
         text = checks.render_build_summary(known["task_spec"], qa, files, checks_result, version)
+        amended = self._amendments(run)
+        if amended:
+            text += "\n\nCriteria you changed during this build:\n" + "\n".join(f"- {a['criterion_id']}: {a['current']} -> {a['proposed']} (measured {a['measured']})" for a in amended)
         run.append_message(Message.create("agent", text, agent_id=MANAGER))
         if run.stage != RunStage.REVIEW:
             run.transition(RunStage.REVIEW, "build verified")
@@ -337,12 +408,22 @@ class ModuleBuilder:
         self._emit(run_id, "build.files_written", {"label": label, "files": [f["path"] for f in file_set["files"]],
                                                     "deleted": file_set.get("delete", []), "commit": commit, "notes": file_set["notes"]})
 
-    def _check_and_repair(self, run_id: str, module: Path, known: dict, file_set: dict, label: str) -> tuple[dict, dict]:
+    def _check_and_repair(self, run_id: str, module: Path, known: dict, file_set: dict, label: str,
+                          allow_question: bool = False) -> tuple[dict, dict]:
         self._stage(run_id, RunStage.QA, f"{label}: running tests")
         result = self._run_checks(module)
+        asked = False
         for round_number in range(0, MAX_REPAIRS + 1):
             self._emit(run_id, "build.checks", {"label": label, "round": round_number, **result})
-            if result["passed"] or round_number == MAX_REPAIRS:
+            if result["passed"]:
+                break
+            # After at least one honest repair, a failure that is only a criterion threshold goes to the human.
+            if allow_question and not asked and round_number >= 1 and not self._asked_before(run_id):
+                asked = True
+                proposal = self._criterion_proposal(run_id, module, known, result)
+                if proposal:
+                    return {**result, "question": proposal}, file_set
+            if round_number == MAX_REPAIRS:
                 break
             self._stage(run_id, RunStage.REPAIR, f"{label}: repair round {round_number + 1}")
             existing = {f["path"] for f in self.list_files(self.store.get(run_id))}
@@ -357,6 +438,141 @@ class ModuleBuilder:
             file_set = {"files": file_set["files"] + fix["files"], "notes": fix["notes"]}
         return result, file_set
 
+    # -- criterion questions ------------------------------------------------
+
+    @staticmethod
+    def criterion_failures(output: str, task_spec: dict) -> list[str]:
+        """Criterion IDs behind the failing tests, or [] when any failure is a crash or an unnamed test."""
+        failed, errored = reports.failing_tests(output)
+        if errored or not failed or "failed to load as a Bokeh app" in output:
+            return []
+        ids = checks.criterion_ids(task_spec)
+        found: set[str] = set()
+        for name in failed:
+            matched = [cid for cid in ids if re.search(rf"(^|_){re.escape(cid.lower())}(_|$)", name.lower())]
+            if not matched:
+                return []
+            found.update(matched)
+        return sorted(found)
+
+    def _asked_before(self, run_id: str) -> bool:
+        return any(e.type == "criterion.question" for e in self.store.get(run_id).events)
+
+    def _criterion_proposal(self, run_id: str, module: Path, known: dict, result: dict) -> dict | None:
+        ids = self.criterion_failures(result["output"], known["task_spec"])
+        if not ids:
+            return None
+        run = self.store.get(run_id)
+        statements = {c["id"]: c["statement"] for c in known["task_spec"].get("acceptance_criteria", [])}
+        agent = self.w.orchestrator.agents.get("builder")
+        composed = self.w.skills.compose(agent, tuple(known.get("task_spec", {}).get("tags", ())))
+        system = f"{composed.text}\n\n{PROPOSAL_FORMAT}\nThe `artifact` has these fields (`?` = optional):\n{self.w.schemas.describe('criterion_proposal')}\n"
+        existing = {f["path"] for f in self.list_files(run)}
+        context = "\n\n".join([
+            "Failing acceptance criteria:\n" + "\n".join(f"- {cid}: {statements.get(cid, '')}" for cid in ids),
+            f"Real test output (tail):\n{result['output']}",
+            "Relevant files:\n" + self._files_block(module, existing, only_in=result["output"]),
+            "Reply with the JSON object described in your instructions.",
+        ])
+        self._emit(run_id, "agent.started", {"agent_id": "builder", "step": "criterion check", "skills": list(composed.skills),
+                                             "references": list(composed.references), "prompt_tokens_est": composed.tokens_est})
+        started = time.monotonic()
+        try:
+            response = self.w.providers[self.w._provider_id(run)].generate(ModelRequest(
+                run_id, "builder", system, ({"role": "user", "content": context},),
+                metadata={"json": True, "tier": agent.tier, "key": "criterion_proposal", "project_id": run.project_id}))
+            reply = parse_agent_reply(response)
+        except Exception as error:  # a failed proposal only means: keep repairing as before
+            self._emit(run_id, "criterion.checked", {"verdict": "unavailable", "error": str(error)[:200]})
+            return None
+        self._emit(run_id, "agent.completed", {"agent_id": "builder", "step": "criterion check", "usage": response.usage,
+                                               "latency_ms": int((time.monotonic() - started) * 1000), "attempts": 1})
+        proposal = reply.get("artifact")
+        errors = ["artifact: an object is required"] if not isinstance(proposal, dict) else self.w.schemas.validate("criterion_proposal", proposal)
+        if not errors:
+            errors = checks.check_criterion_proposal(proposal, ids, result["output"])
+        verdict = proposal.get("verdict") if isinstance(proposal, dict) else None
+        self._emit(run_id, "criterion.checked", {"verdict": verdict, "errors": errors[:4], "criteria": ids})
+        if errors or verdict != "threshold":
+            return None
+        return {**proposal, "statement": statements.get(proposal["criterion_id"], "")}
+
+    def _ask_criterion(self, run_id: str, proposal: dict, label: str) -> None:
+        run = self.store.get(run_id)
+        text = (f"The tests for {proposal['criterion_id']} still fail after a repair, and the Builder thinks the threshold, not the code, is the problem.\n\n"
+                f"Criterion: {proposal['statement']}\nMeasured: {proposal['measured']}\n"
+                f"Current threshold: {proposal.get('current') or '(see the criterion)'}\nProposed: {proposal.get('proposed') or '(no proposal)'}\n"
+                f"Why: {proposal['reason']}\n\nAccept the new threshold, keep it and let the Builder try again, or stop the build.")
+        run.append_message(Message.create("agent", text, agent_id=MANAGER))
+        run.append_event("criterion.question", {**{k: proposal.get(k) for k in ("criterion_id", "statement", "measured", "current", "proposed", "reason")}, "label": label})
+        run.status = RunStatus.AWAITING_USER
+        self.store.save(run)
+
+    def pending_criterion(self, run: RunRecord) -> dict | None:
+        if run.status != RunStatus.AWAITING_USER:
+            return None
+        for event in reversed(run.events):
+            if event.type == "criterion.answered":
+                return None
+            if event.type == "criterion.question":
+                return event.data
+        return None
+
+    def answer_criterion(self, run_id: str, decision: str, note: str = "") -> RunRecord:
+        if decision not in ("accept", "keep", "stop"):
+            raise ValueError("decision must be accept, keep or stop")
+        self.w.claim(run_id)
+        claimed = False
+        try:
+            run = self.store.get(run_id)
+            question = self.pending_criterion(run)
+            if not question:
+                raise ValueError("there is no criterion question waiting for an answer")
+            self._claim_project(run)
+            claimed = True
+            words = {"accept": f"Accept {question['criterion_id']}: {question.get('proposed')}", "keep": f"Keep {question['criterion_id']} as it is and fix the code",
+                     "stop": "Stop the build"}[decision]
+            run.append_message(Message.create("user", words + (f". {note}" if note else ""), target_agent="builder"))
+            run.append_event("criterion.answered", {"decision": decision, "criterion_id": question["criterion_id"], "by": run.created_by})
+            run.status = RunStatus.ACTIVE
+            self.store.save(run)
+            Thread(target=self._guarded, args=(run_id, self._resume_after_criterion, (decision, question)), daemon=True).start()
+        except Exception:
+            self.w.release(run_id)
+            if claimed:
+                self._release_project(run.project_id)
+            raise
+        return run
+
+    def _resume_after_criterion(self, run_id: str, decision: str, question: dict) -> None:
+        run = self.store.get(run_id)
+        known = self.w.artifacts(run)
+        module = self.module_dir(run)
+        feature = run.kind == "feature"
+        backup = Path(run.workspace_path) / ".backup"
+        backup = backup if feature and backup.exists() else None
+        label = question.get("label") or ("feature" if feature else "build")
+        if decision == "stop":
+            self._finish_build(run_id, module, known, {"passed": False}, feature, backup)
+            return
+        if decision == "accept":
+            existing = {f["path"] for f in self.list_files(run)}
+            context = (f"The user approved a changed acceptance threshold for {question['criterion_id']} ({question['statement']}).\n"
+                       f"Measured: {question['measured']}. Change the threshold from {question.get('current')} to {question.get('proposed')}.\n\n"
+                       "Test files:\n" + self._files_block(module, {p for p in existing if p.startswith("tests/")}, only_in=question["criterion_id"].lower())
+                       + "\n\nYour task: edit only the assertion(s) for this criterion so they check the approved threshold. Change nothing else. Return only the files you change (complete content). Reply with the JSON object described in your instructions.")
+            fix = self._call_builder(run_id, f"{label}: amend {question['criterion_id']}", context, known, initial=False, existing=existing, kind="amend")
+            self._apply(run_id, module, fix, f"{label}: amend {question['criterion_id']}")
+            self._emit(run_id, "criterion.amended", {k: question.get(k) for k in ("criterion_id", "measured", "current", "proposed")})
+        else:
+            self._emit(run_id, "criterion.kept", {"criterion_id": question["criterion_id"]})
+        result, _ = self._check_and_repair(run_id, module, known, {"files": [], "notes": ""}, label, allow_question=False)
+        self._finish_build(run_id, module, known, result, feature, backup)
+
+    @staticmethod
+    def _amendments(run: RunRecord) -> list[dict]:
+        return [e.data for e in run.events if e.type == "criterion.amended"]
+
     def _verify(self, run_id: str, known: dict, result: dict, files: list[str]) -> dict:
         run = self.store.get(run_id)
         self._handoff(run_id, "tester", "Report evidence per test case from the real test output.")
@@ -369,6 +585,7 @@ class ModuleBuilder:
             "test_plan (accepted):\n" + json.dumps(known["test_plan"], separators=(",", ":")),
             "Module files: " + ", ".join(files),
             f"Automated test run: command `{result['command']}` -> {'passed' if result['passed'] else 'failed'}\n{result['output']}",
+            *(["Thresholds the user approved during this build (judge against these):\n" + "\n".join(f"- {a['criterion_id']}: {a['current']} -> {a['proposed']}" for a in self._amendments(run))] if self._amendments(run) else []),
             "Reply with the JSON object described in your instructions.",
         ])
         self._emit(run_id, "agent.started", {"agent_id": "tester", "step": "verify", "skills": list(composed.skills),
@@ -399,7 +616,11 @@ class ModuleBuilder:
         path.write_text(json.dumps(artifact, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         run.append_event("artifact.accepted", {"agent_id": "tester", "name": "qa_report", "step": "verify", "path": "artifacts/qa_report.json",
                                                "summary": reply["summary"], "artifact": artifact})
-        run.append_event("handoff.returned", {"from": "tester", "to": MANAGER, "summary": reply["summary"]})
+        counts = {}
+        for result in artifact["results"]:
+            counts[result["status"]] = counts.get(result["status"], 0) + 1
+        run.append_event("handoff.returned", {"from": "tester", "to": MANAGER,
+                                              "summary": f"Verdict: {artifact['verdict'].replace('_', ' ')} ({', '.join(f'{n} {s.replace(chr(95), chr(32))}' for s, n in sorted(counts.items()))})."})
         self.store.save(run)
         return artifact
 
@@ -432,7 +653,7 @@ class ModuleBuilder:
 
     @staticmethod
     def _design_context(run: RunRecord, known: dict, condensed: bool = False) -> str:
-        parts = [f"Goal: {run.goal}", "task_spec (accepted):\n" + json.dumps(known["task_spec"], separators=(",", ":"))]
+        parts = [environment_note().strip(), f"Goal: {run.goal}", "task_spec (accepted):\n" + json.dumps(known["task_spec"], separators=(",", ":"))]
         if condensed:
             parts.append("design_spec (condensed):\n" + json.dumps(condense("design_spec", known["design_spec"]), separators=(",", ":")))
         else:

@@ -127,8 +127,10 @@ class WorkflowTests(Helpers):
             by_agent.setdefault(request.agent_id, []).append(request)
             self.assertTrue(request.metadata["json"])
             self.assertIn("json", request.messages[0]["content"].lower())
-        self.assertEqual(by_agent["project_manager"][0].metadata["tier"], "strong")
-        self.assertEqual(by_agent["researcher"][0].metadata["tier"], "fast")
+        self.assertEqual(by_agent["project_manager"][0].metadata["tier"], "fast")
+        self.assertEqual(by_agent["researcher"][0].metadata["tier"], "strong")
+        self.assertEqual(by_agent["builder"][0].metadata["tier"], "fast")
+        self.assertIn("depth of the science", by_agent["researcher"][0].messages[0]["content"])
         researcher_input = by_agent["researcher"][0].messages[0]["content"]
         self.assertIn("task_spec (accepted)", researcher_input)
         self.assertNotIn("Reply with one JSON", researcher_input)
@@ -240,3 +242,23 @@ class WorkflowTests(Helpers):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SpecialistQuestionTests(Helpers):
+    def test_researcher_can_ask_one_question_and_the_run_resumes(self):
+        def ask(data):
+            data["question"] = "Should learners control the learning-rate schedule, or keep it fixed? I recommend fixed."
+            data["artifact"] = None
+
+        provider = Tweaked(tweak=("researcher", ask))
+        client, run_id, plan = self.run_to_end(provider)
+        events = client.get(f"/api/v1/runs/{run_id}").get_json()["events"]
+        asked = [e["data"] for e in events if e["type"] == "question.asked"]
+        self.assertIn("researcher", [a["agent_id"] for a in asked])
+        self.assertEqual(plan["status"], "awaiting_user")
+        client.post(f"/api/v1/runs/{run_id}/chat", json={"content": "Keep it fixed"})
+        done = self.wait_settled(client, run_id)
+        self.assertEqual(done["status"], "ready_for_review")
+        researcher_calls = [r for r in provider.requests if r.agent_id == "researcher"]
+        self.assertIn("Keep it fixed", researcher_calls[-1].messages[0]["content"])
+        self.assertIn("do not ask another", researcher_calls[-1].messages[0]["content"])

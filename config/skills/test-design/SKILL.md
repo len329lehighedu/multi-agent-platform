@@ -7,7 +7,7 @@ owner: tester
 
 Map every case to criterion IDs. Choose the cheapest layer that can prove the criterion.
 
-**Layers.** `engine` (pure functions, stdlib unittest), `scientific` (oracle comparison), `ui_contract` (build each tab layout headlessly, find widgets with `layout.select({"type": Button})`, invoke registered callbacks directly), `smoke` (the full app builds), `browser` (real rendering and WebSocket; needs a running server, list it in `not_runnable` when unavailable).
+**Layers.** `engine` (pure functions, stdlib unittest), `scientific` (oracle comparison), `ui_contract` (build each tab layout headlessly, find widgets with `layout.select({"type": Button})`, invoke a property callback as `handler("value", old, new)` and a button callback as `handler()`; never call a property callback with no arguments), `smoke` (the full app builds), `browser` (real rendering and WebSocket; needs a running server, list it in `not_runnable` when unavailable).
 
 **Data edge cases.** NaN; infinity; duplicate or decreasing time; fewer rows than the minimum; one column only; constant column; non-numeric cell; column mismatch between files; oversized upload; extreme noise; very small sample.
 

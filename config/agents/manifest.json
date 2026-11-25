@@ -5,7 +5,7 @@
       "id": "project_manager",
       "display_name": "Project Manager",
       "prompt": "project-manager.md",
-      "tier": "strong",
+      "tier": "fast",
       "skills": [
         "intake-and-scoping",
         "plan-synthesis",
@@ -18,7 +18,7 @@
       "id": "researcher",
       "display_name": "Researcher",
       "prompt": "researcher.md",
-      "tier": "fast",
+      "tier": "strong",
       "skills": [
         "model-selection",
         "data-contract",

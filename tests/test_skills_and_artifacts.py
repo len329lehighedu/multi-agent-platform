@@ -148,5 +148,17 @@ class ArtifactTests(unittest.TestCase):
         self.assertEqual(text, checks.render_plan(TASK, PROJECT))
 
 
+
+
+class EnvironmentNoteTests(unittest.TestCase):
+    def test_note_lists_only_installed_science_packages(self):
+        from module_platform.environment import available_packages, environment_note
+
+        found = available_packages()
+        self.assertIn("numpy", found)
+        self.assertNotIn("flask", {name.lower() for name in found})
+        self.assertIn(f"numpy {found['numpy']}", environment_note())
+
+
 if __name__ == "__main__":
     unittest.main()

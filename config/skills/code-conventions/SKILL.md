@@ -12,11 +12,12 @@ owner: builder
 - No module-level mutable state; per-session objects are created inside `main.py`'s per-session code.
 - Files stay under about 400 lines; split before they grow. Functions do one thing.
 - Validate at the boundary (uploads, user input) in `engine/`, once, and reuse the validator across tabs.
-- Python 3.13 compatible; exact pins in `requirements.txt`; no unused imports or dead code.
+- Match the interpreter and package versions stated in the context; exact pins in `requirements.txt`; no unused imports or dead code.
 - Paths come from `app_paths.py`. Debug and host settings are explicit, never implicit.
 - No HTML templates or Flask routes: the module is a Bokeh app.
 
 **Mistakes seen in real builds, do not repeat:**
+- Name every test after the criterion it checks, e.g. `test_ac3_best_degree_in_range`; the platform uses the ID in the name to tell an unreachable criterion (it asks the user) from a bug (it repairs).
 - Tests use the standard library `unittest` only. `pytest` is not installed, so `import pytest` fails the whole suite.
 - Never write an empty file. Give `__init__.py` a one-line docstring; an empty file is rejected.
 - Write each file once, compactly. Do not repeat blocks or pad files; a long, repetitive reply is cut off at the output limit and the build fails.
